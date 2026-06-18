@@ -1,0 +1,1861 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.39.26.7824",
+      "templateHash": "11668503596779647117"
+    }
+  },
+  "parameters": {
+    "environment": {
+      "type": "string",
+      "defaultValue": "dev",
+      "allowedValues": [
+        "dev",
+        "staging",
+        "prod"
+      ],
+      "metadata": {
+        "description": "Environment name (dev, staging, prod)"
+      }
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "eastus",
+      "metadata": {
+        "description": "Azure region for all resources"
+      }
+    },
+    "baseName": {
+      "type": "string",
+      "defaultValue": "voiceagent",
+      "metadata": {
+        "description": "Base name for all resources"
+      }
+    },
+    "alertEmailAddresses": {
+      "type": "array",
+      "defaultValue": [
+        "alerts@example.com"
+      ],
+      "metadata": {
+        "description": "Email addresses for monitoring alerts"
+      }
+    },
+    "tags": {
+      "type": "object",
+      "defaultValue": {
+        "Project": "Voice-Agent",
+        "Environment": "[parameters('environment')]",
+        "ManagedBy": "Bicep",
+        "Application": "Voice-Agent"
+      },
+      "metadata": {
+        "description": "Tags for all resources"
+      }
+    }
+  },
+  "variables": {
+    "resourceGroupName": "[format('rg-{0}-{1}', parameters('baseName'), parameters('environment'))]",
+    "uniqueSuffix": "[uniqueString(subscription().subscriptionId, parameters('baseName'), parameters('environment'))]",
+    "acrName": "[format('acr{0}{1}', parameters('baseName'), variables('uniqueSuffix'))]",
+    "logAnalyticsName": "[format('log-{0}-{1}', parameters('baseName'), parameters('environment'))]",
+    "appInsightsName": "[format('appi-{0}-{1}', parameters('baseName'), parameters('environment'))]",
+    "azureOpenAIName": "[format('aoai-{0}-{1}', parameters('baseName'), parameters('environment'))]",
+    "containerEnvName": "[format('cae-{0}-{1}', parameters('baseName'), parameters('environment'))]",
+    "backendAppName": "[format('ca-{0}-backend-{1}', parameters('baseName'), parameters('environment'))]",
+    "frontendAppName": "[format('ca-{0}-frontend-{1}', parameters('baseName'), parameters('environment'))]",
+    "actionGroupName": "[format('ag-{0}-{1}', parameters('baseName'), parameters('environment'))]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Resources/resourceGroups",
+      "apiVersion": "2024-03-01",
+      "name": "[variables('resourceGroupName')]",
+      "location": "[parameters('location')]",
+      "tags": "[parameters('tags')]"
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "logAnalytics",
+      "resourceGroup": "[variables('resourceGroupName')]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "name": {
+            "value": "[variables('logAnalyticsName')]"
+          },
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "tags": {
+            "value": "[parameters('tags')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.39.26.7824",
+              "templateHash": "7508117906730958126"
+            }
+          },
+          "parameters": {
+            "name": {
+              "type": "string",
+              "metadata": {
+                "description": "Name of the Log Analytics workspace"
+              }
+            },
+            "location": {
+              "type": "string",
+              "metadata": {
+                "description": "Location for the resource"
+              }
+            },
+            "tags": {
+              "type": "object",
+              "defaultValue": {},
+              "metadata": {
+                "description": "Tags for the resource"
+              }
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.OperationalInsights/workspaces",
+              "apiVersion": "2023-09-01",
+              "name": "[parameters('name')]",
+              "location": "[parameters('location')]",
+              "tags": "[parameters('tags')]",
+              "properties": {
+                "sku": {
+                  "name": "PerGB2018"
+                },
+                "retentionInDays": 30,
+                "features": {
+                  "enableLogAccessUsingOnlyResourcePermissions": true
+                },
+                "publicNetworkAccessForIngestion": "Enabled",
+                "publicNetworkAccessForQuery": "Enabled"
+              }
+            }
+          ],
+          "outputs": {
+            "resourceId": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('name'))]"
+            },
+            "name": {
+              "type": "string",
+              "value": "[parameters('name')]"
+            },
+            "customerId": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.OperationalInsights/workspaces', parameters('name')), '2023-09-01').customerId]"
+            },
+            "primarySharedKey": {
+              "type": "string",
+              "value": "[listKeys(resourceId('Microsoft.OperationalInsights/workspaces', parameters('name')), '2023-09-01').primarySharedKey]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[subscriptionResourceId('Microsoft.Resources/resourceGroups', variables('resourceGroupName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "appInsights",
+      "resourceGroup": "[variables('resourceGroupName')]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "name": {
+            "value": "[variables('appInsightsName')]"
+          },
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "workspaceResourceId": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'logAnalytics'), '2025-04-01').outputs.resourceId.value]"
+          },
+          "tags": {
+            "value": "[parameters('tags')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.39.26.7824",
+              "templateHash": "2421160245387449053"
+            }
+          },
+          "parameters": {
+            "name": {
+              "type": "string",
+              "metadata": {
+                "description": "Name of the Application Insights resource"
+              }
+            },
+            "location": {
+              "type": "string",
+              "metadata": {
+                "description": "Location for the resource"
+              }
+            },
+            "workspaceResourceId": {
+              "type": "string",
+              "metadata": {
+                "description": "Resource ID of the Log Analytics workspace"
+              }
+            },
+            "tags": {
+              "type": "object",
+              "defaultValue": {},
+              "metadata": {
+                "description": "Tags for the resource"
+              }
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Insights/components",
+              "apiVersion": "2020-02-02",
+              "name": "[parameters('name')]",
+              "location": "[parameters('location')]",
+              "kind": "web",
+              "tags": "[parameters('tags')]",
+              "properties": {
+                "Application_Type": "web",
+                "WorkspaceResourceId": "[parameters('workspaceResourceId')]",
+                "IngestionMode": "LogAnalytics",
+                "publicNetworkAccessForIngestion": "Enabled",
+                "publicNetworkAccessForQuery": "Enabled",
+                "RetentionInDays": 90,
+                "DisableIpMasking": false,
+                "DisableLocalAuth": false
+              }
+            }
+          ],
+          "outputs": {
+            "resourceId": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.Insights/components', parameters('name'))]"
+            },
+            "name": {
+              "type": "string",
+              "value": "[parameters('name')]"
+            },
+            "connectionString": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.Insights/components', parameters('name')), '2020-02-02').ConnectionString]"
+            },
+            "instrumentationKey": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.Insights/components', parameters('name')), '2020-02-02').InstrumentationKey]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'logAnalytics')]",
+        "[subscriptionResourceId('Microsoft.Resources/resourceGroups', variables('resourceGroupName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "azureOpenAI",
+      "resourceGroup": "[variables('resourceGroupName')]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "name": {
+            "value": "[variables('azureOpenAIName')]"
+          },
+          "location": {
+            "value": "eastus2"
+          },
+          "tags": {
+            "value": "[parameters('tags')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.39.26.7824",
+              "templateHash": "6181230404915757988"
+            }
+          },
+          "parameters": {
+            "name": {
+              "type": "string",
+              "metadata": {
+                "description": "Name of the Azure OpenAI resource"
+              }
+            },
+            "location": {
+              "type": "string",
+              "metadata": {
+                "description": "Location for the resource"
+              }
+            },
+            "tags": {
+              "type": "object",
+              "defaultValue": {},
+              "metadata": {
+                "description": "Tags for the resource"
+              }
+            },
+            "sku": {
+              "type": "string",
+              "defaultValue": "S0",
+              "metadata": {
+                "description": "SKU for Azure OpenAI"
+              }
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.CognitiveServices/accounts",
+              "apiVersion": "2024-10-01",
+              "name": "[parameters('name')]",
+              "location": "[parameters('location')]",
+              "tags": "[parameters('tags')]",
+              "kind": "OpenAI",
+              "sku": {
+                "name": "[parameters('sku')]"
+              },
+              "properties": {
+                "customSubDomainName": "[parameters('name')]",
+                "publicNetworkAccess": "Enabled",
+                "disableLocalAuth": false,
+                "networkAcls": {
+                  "defaultAction": "Allow"
+                }
+              }
+            },
+            {
+              "type": "Microsoft.CognitiveServices/accounts/deployments",
+              "apiVersion": "2024-10-01",
+              "name": "[format('{0}/{1}', parameters('name'), 'gpt-4o-realtime')]",
+              "sku": {
+                "name": "GlobalStandard",
+                "capacity": 1
+              },
+              "properties": {
+                "model": {
+                  "format": "OpenAI",
+                  "name": "gpt-4o-realtime-preview",
+                  "version": "2024-12-17"
+                },
+                "raiPolicyName": "Microsoft.DefaultV2"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.CognitiveServices/accounts', parameters('name'))]"
+              ]
+            }
+          ],
+          "outputs": {
+            "resourceId": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.CognitiveServices/accounts', parameters('name'))]"
+            },
+            "name": {
+              "type": "string",
+              "value": "[parameters('name')]"
+            },
+            "endpoint": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.CognitiveServices/accounts', parameters('name')), '2024-10-01').endpoint]"
+            },
+            "deploymentName": {
+              "type": "string",
+              "value": "gpt-4o-realtime"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[subscriptionResourceId('Microsoft.Resources/resourceGroups', variables('resourceGroupName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "containerRegistry",
+      "resourceGroup": "[variables('resourceGroupName')]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "name": {
+            "value": "[variables('acrName')]"
+          },
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "tags": {
+            "value": "[parameters('tags')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.39.26.7824",
+              "templateHash": "2740262810638586942"
+            }
+          },
+          "parameters": {
+            "name": {
+              "type": "string",
+              "metadata": {
+                "description": "Name of the Container Registry"
+              }
+            },
+            "location": {
+              "type": "string",
+              "metadata": {
+                "description": "Location for the resource"
+              }
+            },
+            "tags": {
+              "type": "object",
+              "defaultValue": {},
+              "metadata": {
+                "description": "Tags for the resource"
+              }
+            },
+            "sku": {
+              "type": "string",
+              "defaultValue": "Standard",
+              "allowedValues": [
+                "Basic",
+                "Standard",
+                "Premium"
+              ],
+              "metadata": {
+                "description": "SKU for the Container Registry"
+              }
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.ContainerRegistry/registries",
+              "apiVersion": "2023-06-01-preview",
+              "name": "[parameters('name')]",
+              "location": "[parameters('location')]",
+              "tags": "[parameters('tags')]",
+              "sku": {
+                "name": "[parameters('sku')]"
+              },
+              "properties": {
+                "adminUserEnabled": true,
+                "publicNetworkAccess": "Enabled"
+              }
+            }
+          ],
+          "outputs": {
+            "resourceId": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.ContainerRegistry/registries', parameters('name'))]"
+            },
+            "name": {
+              "type": "string",
+              "value": "[parameters('name')]"
+            },
+            "loginServer": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.ContainerRegistry/registries', parameters('name')), '2023-06-01-preview').loginServer]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[subscriptionResourceId('Microsoft.Resources/resourceGroups', variables('resourceGroupName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "containerAppsEnvironment",
+      "resourceGroup": "[variables('resourceGroupName')]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "name": {
+            "value": "[variables('containerEnvName')]"
+          },
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "logAnalyticsWorkspaceId": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'logAnalytics'), '2025-04-01').outputs.customerId.value]"
+          },
+          "logAnalyticsSharedKey": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'logAnalytics'), '2025-04-01').outputs.primarySharedKey.value]"
+          },
+          "appInsightsConnectionString": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'appInsights'), '2025-04-01').outputs.connectionString.value]"
+          },
+          "tags": {
+            "value": "[parameters('tags')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.39.26.7824",
+              "templateHash": "2882634822943815558"
+            }
+          },
+          "parameters": {
+            "name": {
+              "type": "string",
+              "metadata": {
+                "description": "Name of the Container Apps Environment"
+              }
+            },
+            "location": {
+              "type": "string",
+              "metadata": {
+                "description": "Location for the resource"
+              }
+            },
+            "logAnalyticsWorkspaceId": {
+              "type": "string",
+              "metadata": {
+                "description": "Log Analytics Workspace Customer ID"
+              }
+            },
+            "logAnalyticsSharedKey": {
+              "type": "securestring",
+              "metadata": {
+                "description": "Log Analytics Workspace Shared Key"
+              }
+            },
+            "appInsightsConnectionString": {
+              "type": "string",
+              "metadata": {
+                "description": "Application Insights Connection String"
+              }
+            },
+            "tags": {
+              "type": "object",
+              "defaultValue": {},
+              "metadata": {
+                "description": "Tags for the resource"
+              }
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.App/managedEnvironments",
+              "apiVersion": "2024-03-01",
+              "name": "[parameters('name')]",
+              "location": "[parameters('location')]",
+              "tags": "[parameters('tags')]",
+              "properties": {
+                "appLogsConfiguration": {
+                  "destination": "log-analytics",
+                  "logAnalyticsConfiguration": {
+                    "customerId": "[parameters('logAnalyticsWorkspaceId')]",
+                    "sharedKey": "[parameters('logAnalyticsSharedKey')]"
+                  }
+                },
+                "daprAIConnectionString": "[parameters('appInsightsConnectionString')]",
+                "zoneRedundant": false,
+                "workloadProfiles": [
+                  {
+                    "name": "Consumption",
+                    "workloadProfileType": "Consumption"
+                  }
+                ]
+              }
+            }
+          ],
+          "outputs": {
+            "resourceId": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.App/managedEnvironments', parameters('name'))]"
+            },
+            "name": {
+              "type": "string",
+              "value": "[parameters('name')]"
+            },
+            "defaultDomain": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.App/managedEnvironments', parameters('name')), '2024-03-01').defaultDomain]"
+            },
+            "staticIp": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.App/managedEnvironments', parameters('name')), '2024-03-01').staticIp]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'appInsights')]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'logAnalytics')]",
+        "[subscriptionResourceId('Microsoft.Resources/resourceGroups', variables('resourceGroupName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "backendApp",
+      "resourceGroup": "[variables('resourceGroupName')]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "name": {
+            "value": "[variables('backendAppName')]"
+          },
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "containerAppsEnvironmentId": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'containerAppsEnvironment'), '2025-04-01').outputs.resourceId.value]"
+          },
+          "containerRegistryLoginServer": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'containerRegistry'), '2025-04-01').outputs.loginServer.value]"
+          },
+          "containerRegistryName": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'containerRegistry'), '2025-04-01').outputs.name.value]"
+          },
+          "imageName": {
+            "value": "[format('{0}/{1}-backend:latest', reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'containerRegistry'), '2025-04-01').outputs.loginServer.value, parameters('baseName'))]"
+          },
+          "targetPort": {
+            "value": 3001
+          },
+          "isBackend": {
+            "value": true
+          },
+          "environmentVariables": {
+            "value": [
+              {
+                "name": "NODE_ENV",
+                "value": "production"
+              },
+              {
+                "name": "PORT",
+                "value": "3001"
+              },
+              {
+                "name": "AZURE_OPENAI_ENDPOINT",
+                "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'azureOpenAI'), '2025-04-01').outputs.endpoint.value]"
+              },
+              {
+                "name": "AZURE_OPENAI_DEPLOYMENT",
+                "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'azureOpenAI'), '2025-04-01').outputs.deploymentName.value]"
+              },
+              {
+                "name": "USE_AZURE_OPENAI",
+                "value": "true"
+              },
+              {
+                "name": "APPLICATIONINSIGHTS_CONNECTION_STRING",
+                "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'appInsights'), '2025-04-01').outputs.connectionString.value]"
+              },
+              {
+                "name": "LOG_LEVEL",
+                "value": "info"
+              },
+              {
+                "name": "CORS_ORIGIN",
+                "value": "[format('https://{0}.{1}', variables('frontendAppName'), reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'containerAppsEnvironment'), '2025-04-01').outputs.defaultDomain.value)]"
+              }
+            ]
+          },
+          "secrets": {
+            "value": []
+          },
+          "tags": {
+            "value": "[parameters('tags')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.39.26.7824",
+              "templateHash": "13444436460927694551"
+            }
+          },
+          "parameters": {
+            "name": {
+              "type": "string",
+              "metadata": {
+                "description": "Name of the Container App"
+              }
+            },
+            "location": {
+              "type": "string",
+              "metadata": {
+                "description": "Location for the resource"
+              }
+            },
+            "containerAppsEnvironmentId": {
+              "type": "string",
+              "metadata": {
+                "description": "Resource ID of the Container Apps Environment"
+              }
+            },
+            "containerRegistryLoginServer": {
+              "type": "string",
+              "metadata": {
+                "description": "Container Registry Login Server"
+              }
+            },
+            "containerRegistryName": {
+              "type": "string",
+              "metadata": {
+                "description": "Container Registry Name"
+              }
+            },
+            "imageName": {
+              "type": "string",
+              "metadata": {
+                "description": "Container image name with tag"
+              }
+            },
+            "targetPort": {
+              "type": "int",
+              "metadata": {
+                "description": "Target port for the container"
+              }
+            },
+            "isBackend": {
+              "type": "bool",
+              "defaultValue": false,
+              "metadata": {
+                "description": "Whether this is a backend service (enables WebSocket)"
+              }
+            },
+            "environmentVariables": {
+              "type": "array",
+              "defaultValue": [],
+              "metadata": {
+                "description": "Environment variables for the container"
+              }
+            },
+            "secrets": {
+              "type": "array",
+              "defaultValue": [],
+              "metadata": {
+                "description": "Secrets for the container"
+              }
+            },
+            "tags": {
+              "type": "object",
+              "defaultValue": {},
+              "metadata": {
+                "description": "Tags for the resource"
+              }
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.App/containerApps",
+              "apiVersion": "2024-03-01",
+              "name": "[parameters('name')]",
+              "location": "[parameters('location')]",
+              "tags": "[parameters('tags')]",
+              "identity": {
+                "type": "SystemAssigned"
+              },
+              "properties": {
+                "managedEnvironmentId": "[parameters('containerAppsEnvironmentId')]",
+                "workloadProfileName": "Consumption",
+                "configuration": {
+                  "activeRevisionsMode": "Single",
+                  "ingress": {
+                    "external": true,
+                    "targetPort": "[parameters('targetPort')]",
+                    "transport": "[if(parameters('isBackend'), 'http', 'auto')]",
+                    "corsPolicy": "[if(parameters('isBackend'), createObject('allowedOrigins', createArray('*'), 'allowedHeaders', createArray('*'), 'allowedMethods', createArray('GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'), 'allowCredentials', true(), 'maxAge', 86400), null())]",
+                    "clientCertificateMode": "ignore",
+                    "stickySessions": {
+                      "affinity": "[if(parameters('isBackend'), 'sticky', 'none')]"
+                    }
+                  },
+                  "registries": [
+                    {
+                      "server": "[parameters('containerRegistryLoginServer')]",
+                      "username": "[listCredentials(resourceId('Microsoft.ContainerRegistry/registries', parameters('containerRegistryName')), '2023-06-01-preview').username]",
+                      "passwordSecretRef": "acr-password"
+                    }
+                  ],
+                  "secrets": "[concat(createArray(createObject('name', 'acr-password', 'value', listCredentials(resourceId('Microsoft.ContainerRegistry/registries', parameters('containerRegistryName')), '2023-06-01-preview').passwords[0].value)), parameters('secrets'))]"
+                },
+                "template": {
+                  "containers": [
+                    {
+                      "image": "[parameters('imageName')]",
+                      "name": "main",
+                      "resources": {
+                        "cpu": "[json('0.5')]",
+                        "memory": "1Gi"
+                      },
+                      "env": "[parameters('environmentVariables')]",
+                      "probes": [
+                        {
+                          "type": "Liveness",
+                          "httpGet": {
+                            "port": "[parameters('targetPort')]",
+                            "path": "[if(parameters('isBackend'), '/health', '/')]"
+                          },
+                          "initialDelaySeconds": 30,
+                          "periodSeconds": 30,
+                          "failureThreshold": 3
+                        },
+                        {
+                          "type": "Readiness",
+                          "httpGet": {
+                            "port": "[parameters('targetPort')]",
+                            "path": "[if(parameters('isBackend'), '/health', '/')]"
+                          },
+                          "initialDelaySeconds": 10,
+                          "periodSeconds": 10,
+                          "failureThreshold": 3
+                        }
+                      ]
+                    }
+                  ],
+                  "scale": {
+                    "minReplicas": 1,
+                    "maxReplicas": 10,
+                    "rules": [
+                      {
+                        "name": "http-requests",
+                        "http": {
+                          "metadata": {
+                            "concurrentRequests": "100"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "type": "Microsoft.Authorization/roleAssignments",
+              "apiVersion": "2022-04-01",
+              "scope": "[format('Microsoft.ContainerRegistry/registries/{0}', parameters('containerRegistryName'))]",
+              "name": "[guid(resourceId('Microsoft.ContainerRegistry/registries', parameters('containerRegistryName')), resourceId('Microsoft.App/containerApps', parameters('name')), '7f951dda-4ed3-4680-a7ca-43fe172d538d')]",
+              "properties": {
+                "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '7f951dda-4ed3-4680-a7ca-43fe172d538d')]",
+                "principalId": "[reference(resourceId('Microsoft.App/containerApps', parameters('name')), '2024-03-01', 'full').identity.principalId]",
+                "principalType": "ServicePrincipal"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.App/containerApps', parameters('name'))]"
+              ]
+            }
+          ],
+          "outputs": {
+            "resourceId": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.App/containerApps', parameters('name'))]"
+            },
+            "name": {
+              "type": "string",
+              "value": "[parameters('name')]"
+            },
+            "fqdn": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.App/containerApps', parameters('name')), '2024-03-01').configuration.ingress.fqdn]"
+            },
+            "latestRevisionName": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.App/containerApps', parameters('name')), '2024-03-01').latestRevisionName]"
+            },
+            "principalId": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.App/containerApps', parameters('name')), '2024-03-01', 'full').identity.principalId]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'appInsights')]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'azureOpenAI')]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'containerAppsEnvironment')]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'containerRegistry')]",
+        "[subscriptionResourceId('Microsoft.Resources/resourceGroups', variables('resourceGroupName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "backendOpenAIRole",
+      "resourceGroup": "[variables('resourceGroupName')]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "principalId": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'backendApp'), '2025-04-01').outputs.principalId.value]"
+          },
+          "principalType": {
+            "value": "ServicePrincipal"
+          },
+          "roleDefinitionId": {
+            "value": "5e0bd9bd-7b93-4f28-af87-19fc36ad61bd"
+          },
+          "azureOpenAIName": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'azureOpenAI'), '2025-04-01').outputs.name.value]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.39.26.7824",
+              "templateHash": "6517298066921926754"
+            }
+          },
+          "parameters": {
+            "principalId": {
+              "type": "string",
+              "metadata": {
+                "description": "Principal ID to assign the role to"
+              }
+            },
+            "principalType": {
+              "type": "string",
+              "defaultValue": "ServicePrincipal",
+              "allowedValues": [
+                "ServicePrincipal",
+                "User",
+                "Group"
+              ],
+              "metadata": {
+                "description": "Principal type"
+              }
+            },
+            "roleDefinitionId": {
+              "type": "string",
+              "metadata": {
+                "description": "Role definition ID (GUID)"
+              }
+            },
+            "azureOpenAIName": {
+              "type": "string",
+              "metadata": {
+                "description": "Name of the Azure OpenAI resource"
+              }
+            }
+          },
+          "variables": {
+            "roleAssignmentName": "[guid(resourceId('Microsoft.CognitiveServices/accounts', parameters('azureOpenAIName')), parameters('principalId'), parameters('roleDefinitionId'))]"
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Authorization/roleAssignments",
+              "apiVersion": "2022-04-01",
+              "scope": "[format('Microsoft.CognitiveServices/accounts/{0}', parameters('azureOpenAIName'))]",
+              "name": "[variables('roleAssignmentName')]",
+              "properties": {
+                "principalId": "[parameters('principalId')]",
+                "principalType": "[parameters('principalType')]",
+                "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', parameters('roleDefinitionId'))]"
+              }
+            }
+          ],
+          "outputs": {
+            "roleAssignmentId": {
+              "type": "string",
+              "value": "[extensionResourceId(resourceId('Microsoft.CognitiveServices/accounts', parameters('azureOpenAIName')), 'Microsoft.Authorization/roleAssignments', variables('roleAssignmentName'))]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'azureOpenAI')]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'backendApp')]",
+        "[subscriptionResourceId('Microsoft.Resources/resourceGroups', variables('resourceGroupName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "frontendApp",
+      "resourceGroup": "[variables('resourceGroupName')]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "name": {
+            "value": "[variables('frontendAppName')]"
+          },
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "containerAppsEnvironmentId": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'containerAppsEnvironment'), '2025-04-01').outputs.resourceId.value]"
+          },
+          "containerRegistryLoginServer": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'containerRegistry'), '2025-04-01').outputs.loginServer.value]"
+          },
+          "containerRegistryName": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'containerRegistry'), '2025-04-01').outputs.name.value]"
+          },
+          "imageName": {
+            "value": "[format('{0}/{1}-frontend:latest', reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'containerRegistry'), '2025-04-01').outputs.loginServer.value, parameters('baseName'))]"
+          },
+          "targetPort": {
+            "value": 80
+          },
+          "isBackend": {
+            "value": false
+          },
+          "environmentVariables": {
+            "value": [
+              {
+                "name": "VITE_WS_URL",
+                "value": "[format('wss://{0}', reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'backendApp'), '2025-04-01').outputs.fqdn.value)]"
+              },
+              {
+                "name": "VITE_API_URL",
+                "value": "[format('https://{0}', reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'backendApp'), '2025-04-01').outputs.fqdn.value)]"
+              }
+            ]
+          },
+          "secrets": {
+            "value": []
+          },
+          "tags": {
+            "value": "[parameters('tags')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.39.26.7824",
+              "templateHash": "13444436460927694551"
+            }
+          },
+          "parameters": {
+            "name": {
+              "type": "string",
+              "metadata": {
+                "description": "Name of the Container App"
+              }
+            },
+            "location": {
+              "type": "string",
+              "metadata": {
+                "description": "Location for the resource"
+              }
+            },
+            "containerAppsEnvironmentId": {
+              "type": "string",
+              "metadata": {
+                "description": "Resource ID of the Container Apps Environment"
+              }
+            },
+            "containerRegistryLoginServer": {
+              "type": "string",
+              "metadata": {
+                "description": "Container Registry Login Server"
+              }
+            },
+            "containerRegistryName": {
+              "type": "string",
+              "metadata": {
+                "description": "Container Registry Name"
+              }
+            },
+            "imageName": {
+              "type": "string",
+              "metadata": {
+                "description": "Container image name with tag"
+              }
+            },
+            "targetPort": {
+              "type": "int",
+              "metadata": {
+                "description": "Target port for the container"
+              }
+            },
+            "isBackend": {
+              "type": "bool",
+              "defaultValue": false,
+              "metadata": {
+                "description": "Whether this is a backend service (enables WebSocket)"
+              }
+            },
+            "environmentVariables": {
+              "type": "array",
+              "defaultValue": [],
+              "metadata": {
+                "description": "Environment variables for the container"
+              }
+            },
+            "secrets": {
+              "type": "array",
+              "defaultValue": [],
+              "metadata": {
+                "description": "Secrets for the container"
+              }
+            },
+            "tags": {
+              "type": "object",
+              "defaultValue": {},
+              "metadata": {
+                "description": "Tags for the resource"
+              }
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.App/containerApps",
+              "apiVersion": "2024-03-01",
+              "name": "[parameters('name')]",
+              "location": "[parameters('location')]",
+              "tags": "[parameters('tags')]",
+              "identity": {
+                "type": "SystemAssigned"
+              },
+              "properties": {
+                "managedEnvironmentId": "[parameters('containerAppsEnvironmentId')]",
+                "workloadProfileName": "Consumption",
+                "configuration": {
+                  "activeRevisionsMode": "Single",
+                  "ingress": {
+                    "external": true,
+                    "targetPort": "[parameters('targetPort')]",
+                    "transport": "[if(parameters('isBackend'), 'http', 'auto')]",
+                    "corsPolicy": "[if(parameters('isBackend'), createObject('allowedOrigins', createArray('*'), 'allowedHeaders', createArray('*'), 'allowedMethods', createArray('GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'), 'allowCredentials', true(), 'maxAge', 86400), null())]",
+                    "clientCertificateMode": "ignore",
+                    "stickySessions": {
+                      "affinity": "[if(parameters('isBackend'), 'sticky', 'none')]"
+                    }
+                  },
+                  "registries": [
+                    {
+                      "server": "[parameters('containerRegistryLoginServer')]",
+                      "username": "[listCredentials(resourceId('Microsoft.ContainerRegistry/registries', parameters('containerRegistryName')), '2023-06-01-preview').username]",
+                      "passwordSecretRef": "acr-password"
+                    }
+                  ],
+                  "secrets": "[concat(createArray(createObject('name', 'acr-password', 'value', listCredentials(resourceId('Microsoft.ContainerRegistry/registries', parameters('containerRegistryName')), '2023-06-01-preview').passwords[0].value)), parameters('secrets'))]"
+                },
+                "template": {
+                  "containers": [
+                    {
+                      "image": "[parameters('imageName')]",
+                      "name": "main",
+                      "resources": {
+                        "cpu": "[json('0.5')]",
+                        "memory": "1Gi"
+                      },
+                      "env": "[parameters('environmentVariables')]",
+                      "probes": [
+                        {
+                          "type": "Liveness",
+                          "httpGet": {
+                            "port": "[parameters('targetPort')]",
+                            "path": "[if(parameters('isBackend'), '/health', '/')]"
+                          },
+                          "initialDelaySeconds": 30,
+                          "periodSeconds": 30,
+                          "failureThreshold": 3
+                        },
+                        {
+                          "type": "Readiness",
+                          "httpGet": {
+                            "port": "[parameters('targetPort')]",
+                            "path": "[if(parameters('isBackend'), '/health', '/')]"
+                          },
+                          "initialDelaySeconds": 10,
+                          "periodSeconds": 10,
+                          "failureThreshold": 3
+                        }
+                      ]
+                    }
+                  ],
+                  "scale": {
+                    "minReplicas": 1,
+                    "maxReplicas": 10,
+                    "rules": [
+                      {
+                        "name": "http-requests",
+                        "http": {
+                          "metadata": {
+                            "concurrentRequests": "100"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "type": "Microsoft.Authorization/roleAssignments",
+              "apiVersion": "2022-04-01",
+              "scope": "[format('Microsoft.ContainerRegistry/registries/{0}', parameters('containerRegistryName'))]",
+              "name": "[guid(resourceId('Microsoft.ContainerRegistry/registries', parameters('containerRegistryName')), resourceId('Microsoft.App/containerApps', parameters('name')), '7f951dda-4ed3-4680-a7ca-43fe172d538d')]",
+              "properties": {
+                "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '7f951dda-4ed3-4680-a7ca-43fe172d538d')]",
+                "principalId": "[reference(resourceId('Microsoft.App/containerApps', parameters('name')), '2024-03-01', 'full').identity.principalId]",
+                "principalType": "ServicePrincipal"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.App/containerApps', parameters('name'))]"
+              ]
+            }
+          ],
+          "outputs": {
+            "resourceId": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.App/containerApps', parameters('name'))]"
+            },
+            "name": {
+              "type": "string",
+              "value": "[parameters('name')]"
+            },
+            "fqdn": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.App/containerApps', parameters('name')), '2024-03-01').configuration.ingress.fqdn]"
+            },
+            "latestRevisionName": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.App/containerApps', parameters('name')), '2024-03-01').latestRevisionName]"
+            },
+            "principalId": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.App/containerApps', parameters('name')), '2024-03-01', 'full').identity.principalId]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'backendApp')]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'containerAppsEnvironment')]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'containerRegistry')]",
+        "[subscriptionResourceId('Microsoft.Resources/resourceGroups', variables('resourceGroupName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "actionGroup",
+      "resourceGroup": "[variables('resourceGroupName')]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "name": {
+            "value": "[variables('actionGroupName')]"
+          },
+          "shortName": {
+            "value": "VAAlerts"
+          },
+          "emailReceivers": {
+            "copy": [
+              {
+                "name": "value",
+                "count": "[length(parameters('alertEmailAddresses'))]",
+                "input": "[createObject('name', format('Email_{0}', copyIndex('value')), 'emailAddress', parameters('alertEmailAddresses')[copyIndex('value')], 'useCommonAlertSchema', true())]"
+              }
+            ]
+          },
+          "tags": {
+            "value": "[parameters('tags')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.39.26.7824",
+              "templateHash": "8156126468873338501"
+            }
+          },
+          "parameters": {
+            "name": {
+              "type": "string",
+              "metadata": {
+                "description": "Name of the Action Group"
+              }
+            },
+            "shortName": {
+              "type": "string",
+              "maxLength": 12,
+              "metadata": {
+                "description": "Short name for the Action Group (max 12 characters)"
+              }
+            },
+            "emailReceivers": {
+              "type": "array",
+              "defaultValue": [],
+              "metadata": {
+                "description": "Email receivers for alerts"
+              }
+            },
+            "tags": {
+              "type": "object",
+              "defaultValue": {},
+              "metadata": {
+                "description": "Tags for the resource"
+              }
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Insights/actionGroups",
+              "apiVersion": "2023-01-01",
+              "name": "[parameters('name')]",
+              "location": "global",
+              "tags": "[parameters('tags')]",
+              "properties": {
+                "groupShortName": "[parameters('shortName')]",
+                "enabled": true,
+                "emailReceivers": "[parameters('emailReceivers')]"
+              }
+            }
+          ],
+          "outputs": {
+            "resourceId": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.Insights/actionGroups', parameters('name'))]"
+            },
+            "name": {
+              "type": "string",
+              "value": "[parameters('name')]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[subscriptionResourceId('Microsoft.Resources/resourceGroups', variables('resourceGroupName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "alerts",
+      "resourceGroup": "[variables('resourceGroupName')]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "baseName": {
+            "value": "[parameters('baseName')]"
+          },
+          "environment": {
+            "value": "[parameters('environment')]"
+          },
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "actionGroupId": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'actionGroup'), '2025-04-01').outputs.resourceId.value]"
+          },
+          "appInsightsResourceId": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'appInsights'), '2025-04-01').outputs.resourceId.value]"
+          },
+          "backendAppResourceId": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'backendApp'), '2025-04-01').outputs.resourceId.value]"
+          },
+          "frontendAppResourceId": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'frontendApp'), '2025-04-01').outputs.resourceId.value]"
+          },
+          "tags": {
+            "value": "[parameters('tags')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.39.26.7824",
+              "templateHash": "2193370026395894927"
+            }
+          },
+          "parameters": {
+            "baseName": {
+              "type": "string",
+              "metadata": {
+                "description": "Base name for resources"
+              }
+            },
+            "environment": {
+              "type": "string",
+              "metadata": {
+                "description": "Environment name"
+              }
+            },
+            "location": {
+              "type": "string",
+              "metadata": {
+                "description": "Location for resources"
+              }
+            },
+            "actionGroupId": {
+              "type": "string",
+              "metadata": {
+                "description": "Action Group Resource ID for notifications"
+              }
+            },
+            "appInsightsResourceId": {
+              "type": "string",
+              "metadata": {
+                "description": "Application Insights Resource ID"
+              }
+            },
+            "backendAppResourceId": {
+              "type": "string",
+              "metadata": {
+                "description": "Backend Container App Resource ID"
+              }
+            },
+            "frontendAppResourceId": {
+              "type": "string",
+              "metadata": {
+                "description": "Frontend Container App Resource ID"
+              }
+            },
+            "tags": {
+              "type": "object",
+              "defaultValue": {},
+              "metadata": {
+                "description": "Tags for resources"
+              }
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Insights/metricAlerts",
+              "apiVersion": "2018-03-01",
+              "name": "[format('alert-{0}-server-errors-{1}', parameters('baseName'), parameters('environment'))]",
+              "location": "global",
+              "tags": "[parameters('tags')]",
+              "properties": {
+                "description": "Alert when server error rate exceeds 5% in 5 minutes",
+                "severity": 1,
+                "enabled": true,
+                "scopes": [
+                  "[parameters('appInsightsResourceId')]"
+                ],
+                "evaluationFrequency": "PT5M",
+                "windowSize": "PT5M",
+                "criteria": {
+                  "odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria",
+                  "allOf": [
+                    {
+                      "name": "ServerErrors",
+                      "metricName": "requests/failed",
+                      "metricNamespace": "microsoft.insights/components",
+                      "operator": "GreaterThan",
+                      "threshold": 5,
+                      "timeAggregation": "Count",
+                      "criterionType": "StaticThresholdCriterion"
+                    }
+                  ]
+                },
+                "actions": [
+                  {
+                    "actionGroupId": "[parameters('actionGroupId')]",
+                    "webHookProperties": {}
+                  }
+                ],
+                "autoMitigate": true
+              }
+            },
+            {
+              "type": "Microsoft.Insights/metricAlerts",
+              "apiVersion": "2018-03-01",
+              "name": "[format('alert-{0}-response-time-{1}', parameters('baseName'), parameters('environment'))]",
+              "location": "global",
+              "tags": "[parameters('tags')]",
+              "properties": {
+                "description": "Alert when average response time exceeds 3 seconds",
+                "severity": 2,
+                "enabled": true,
+                "scopes": [
+                  "[parameters('appInsightsResourceId')]"
+                ],
+                "evaluationFrequency": "PT5M",
+                "windowSize": "PT5M",
+                "criteria": {
+                  "odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria",
+                  "allOf": [
+                    {
+                      "name": "ResponseTime",
+                      "metricName": "requests/duration",
+                      "metricNamespace": "microsoft.insights/components",
+                      "operator": "GreaterThan",
+                      "threshold": 3000,
+                      "timeAggregation": "Average",
+                      "criterionType": "StaticThresholdCriterion"
+                    }
+                  ]
+                },
+                "actions": [
+                  {
+                    "actionGroupId": "[parameters('actionGroupId')]",
+                    "webHookProperties": {}
+                  }
+                ],
+                "autoMitigate": true
+              }
+            },
+            {
+              "type": "Microsoft.Insights/metricAlerts",
+              "apiVersion": "2018-03-01",
+              "name": "[format('alert-{0}-backend-cpu-{1}', parameters('baseName'), parameters('environment'))]",
+              "location": "global",
+              "tags": "[parameters('tags')]",
+              "properties": {
+                "description": "Alert when backend CPU usage exceeds 80%",
+                "severity": 2,
+                "enabled": true,
+                "scopes": [
+                  "[parameters('backendAppResourceId')]"
+                ],
+                "evaluationFrequency": "PT5M",
+                "windowSize": "PT5M",
+                "criteria": {
+                  "odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria",
+                  "allOf": [
+                    {
+                      "name": "CPUUsage",
+                      "metricName": "CpuUsage",
+                      "metricNamespace": "Microsoft.App/containerApps",
+                      "operator": "GreaterThan",
+                      "threshold": 80,
+                      "timeAggregation": "Average",
+                      "criterionType": "StaticThresholdCriterion"
+                    }
+                  ]
+                },
+                "actions": [
+                  {
+                    "actionGroupId": "[parameters('actionGroupId')]",
+                    "webHookProperties": {}
+                  }
+                ],
+                "autoMitigate": true
+              }
+            },
+            {
+              "type": "Microsoft.Insights/metricAlerts",
+              "apiVersion": "2018-03-01",
+              "name": "[format('alert-{0}-backend-memory-{1}', parameters('baseName'), parameters('environment'))]",
+              "location": "global",
+              "tags": "[parameters('tags')]",
+              "properties": {
+                "description": "Alert when backend memory usage exceeds 80%",
+                "severity": 2,
+                "enabled": true,
+                "scopes": [
+                  "[parameters('backendAppResourceId')]"
+                ],
+                "evaluationFrequency": "PT5M",
+                "windowSize": "PT5M",
+                "criteria": {
+                  "odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria",
+                  "allOf": [
+                    {
+                      "name": "MemoryUsage",
+                      "metricName": "MemoryUsage",
+                      "metricNamespace": "Microsoft.App/containerApps",
+                      "operator": "GreaterThan",
+                      "threshold": 80,
+                      "timeAggregation": "Average",
+                      "criterionType": "StaticThresholdCriterion"
+                    }
+                  ]
+                },
+                "actions": [
+                  {
+                    "actionGroupId": "[parameters('actionGroupId')]",
+                    "webHookProperties": {}
+                  }
+                ],
+                "autoMitigate": true
+              }
+            },
+            {
+              "type": "Microsoft.Insights/metricAlerts",
+              "apiVersion": "2018-03-01",
+              "name": "[format('alert-{0}-backend-replicas-{1}', parameters('baseName'), parameters('environment'))]",
+              "location": "global",
+              "tags": "[parameters('tags')]",
+              "properties": {
+                "description": "Alert when backend has no running replicas",
+                "severity": 0,
+                "enabled": true,
+                "scopes": [
+                  "[parameters('backendAppResourceId')]"
+                ],
+                "evaluationFrequency": "PT1M",
+                "windowSize": "PT5M",
+                "criteria": {
+                  "odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria",
+                  "allOf": [
+                    {
+                      "name": "ReplicaCount",
+                      "metricName": "Replicas",
+                      "metricNamespace": "Microsoft.App/containerApps",
+                      "operator": "LessThan",
+                      "threshold": 1,
+                      "timeAggregation": "Average",
+                      "criterionType": "StaticThresholdCriterion"
+                    }
+                  ]
+                },
+                "actions": [
+                  {
+                    "actionGroupId": "[parameters('actionGroupId')]",
+                    "webHookProperties": {}
+                  }
+                ],
+                "autoMitigate": true
+              }
+            },
+            {
+              "type": "Microsoft.Insights/metricAlerts",
+              "apiVersion": "2018-03-01",
+              "name": "[format('alert-{0}-frontend-replicas-{1}', parameters('baseName'), parameters('environment'))]",
+              "location": "global",
+              "tags": "[parameters('tags')]",
+              "properties": {
+                "description": "Alert when frontend has no running replicas",
+                "severity": 0,
+                "enabled": true,
+                "scopes": [
+                  "[parameters('frontendAppResourceId')]"
+                ],
+                "evaluationFrequency": "PT1M",
+                "windowSize": "PT5M",
+                "criteria": {
+                  "odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria",
+                  "allOf": [
+                    {
+                      "name": "ReplicaCount",
+                      "metricName": "Replicas",
+                      "metricNamespace": "Microsoft.App/containerApps",
+                      "operator": "LessThan",
+                      "threshold": 1,
+                      "timeAggregation": "Average",
+                      "criterionType": "StaticThresholdCriterion"
+                    }
+                  ]
+                },
+                "actions": [
+                  {
+                    "actionGroupId": "[parameters('actionGroupId')]",
+                    "webHookProperties": {}
+                  }
+                ],
+                "autoMitigate": true
+              }
+            },
+            {
+              "type": "Microsoft.Insights/metricAlerts",
+              "apiVersion": "2018-03-01",
+              "name": "[format('alert-{0}-exceptions-{1}', parameters('baseName'), parameters('environment'))]",
+              "location": "global",
+              "tags": "[parameters('tags')]",
+              "properties": {
+                "description": "Alert when exception rate exceeds 10 per 5 minutes",
+                "severity": 2,
+                "enabled": true,
+                "scopes": [
+                  "[parameters('appInsightsResourceId')]"
+                ],
+                "evaluationFrequency": "PT5M",
+                "windowSize": "PT5M",
+                "criteria": {
+                  "odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria",
+                  "allOf": [
+                    {
+                      "name": "Exceptions",
+                      "metricName": "exceptions/count",
+                      "metricNamespace": "microsoft.insights/components",
+                      "operator": "GreaterThan",
+                      "threshold": 10,
+                      "timeAggregation": "Count",
+                      "criterionType": "StaticThresholdCriterion"
+                    }
+                  ]
+                },
+                "actions": [
+                  {
+                    "actionGroupId": "[parameters('actionGroupId')]",
+                    "webHookProperties": {}
+                  }
+                ],
+                "autoMitigate": true
+              }
+            },
+            {
+              "type": "Microsoft.Insights/metricAlerts",
+              "apiVersion": "2018-03-01",
+              "name": "[format('alert-{0}-websocket-{1}', parameters('baseName'), parameters('environment'))]",
+              "location": "global",
+              "tags": "[parameters('tags')]",
+              "properties": {
+                "description": "Alert when WebSocket connections drop significantly",
+                "severity": 2,
+                "enabled": true,
+                "scopes": [
+                  "[parameters('backendAppResourceId')]"
+                ],
+                "evaluationFrequency": "PT5M",
+                "windowSize": "PT15M",
+                "criteria": {
+                  "odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria",
+                  "allOf": [
+                    {
+                      "name": "RestartCount",
+                      "metricName": "RestartCount",
+                      "metricNamespace": "Microsoft.App/containerApps",
+                      "operator": "GreaterThan",
+                      "threshold": 3,
+                      "timeAggregation": "Total",
+                      "criterionType": "StaticThresholdCriterion"
+                    }
+                  ]
+                },
+                "actions": [
+                  {
+                    "actionGroupId": "[parameters('actionGroupId')]",
+                    "webHookProperties": {}
+                  }
+                ],
+                "autoMitigate": true
+              }
+            }
+          ],
+          "outputs": {
+            "serverErrorAlertId": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.Insights/metricAlerts', format('alert-{0}-server-errors-{1}', parameters('baseName'), parameters('environment')))]"
+            },
+            "responseTimeAlertId": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.Insights/metricAlerts', format('alert-{0}-response-time-{1}', parameters('baseName'), parameters('environment')))]"
+            },
+            "backendCpuAlertId": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.Insights/metricAlerts', format('alert-{0}-backend-cpu-{1}', parameters('baseName'), parameters('environment')))]"
+            },
+            "backendMemoryAlertId": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.Insights/metricAlerts', format('alert-{0}-backend-memory-{1}', parameters('baseName'), parameters('environment')))]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'actionGroup')]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'appInsights')]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'backendApp')]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'frontendApp')]",
+        "[subscriptionResourceId('Microsoft.Resources/resourceGroups', variables('resourceGroupName'))]"
+      ]
+    }
+  ],
+  "outputs": {
+    "resourceGroupName": {
+      "type": "string",
+      "value": "[variables('resourceGroupName')]"
+    },
+    "containerRegistryLoginServer": {
+      "type": "string",
+      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'containerRegistry'), '2025-04-01').outputs.loginServer.value]"
+    },
+    "containerRegistryName": {
+      "type": "string",
+      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'containerRegistry'), '2025-04-01').outputs.name.value]"
+    },
+    "backendUrl": {
+      "type": "string",
+      "value": "[format('https://{0}', reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'backendApp'), '2025-04-01').outputs.fqdn.value)]"
+    },
+    "frontendUrl": {
+      "type": "string",
+      "value": "[format('https://{0}', reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'frontendApp'), '2025-04-01').outputs.fqdn.value)]"
+    },
+    "appInsightsConnectionString": {
+      "type": "string",
+      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'appInsights'), '2025-04-01').outputs.connectionString.value]"
+    },
+    "logAnalyticsWorkspaceId": {
+      "type": "string",
+      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'logAnalytics'), '2025-04-01').outputs.resourceId.value]"
+    },
+    "azureOpenAIEndpoint": {
+      "type": "string",
+      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'azureOpenAI'), '2025-04-01').outputs.endpoint.value]"
+    },
+    "azureOpenAIDeploymentName": {
+      "type": "string",
+      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'azureOpenAI'), '2025-04-01').outputs.deploymentName.value]"
+    }
+  }
+}

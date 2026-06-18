@@ -28,7 +28,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(__dirname, '..');
 const CHECK = process.argv.includes('--check');
 
-const VOICE_AGENT_DIR = join(repoRoot, 'sutter-voice-agent');
+const VOICE_AGENT_DIR = join(repoRoot, 'examples', 'voice-agent');
 const CONFIG_PATH = join(repoRoot, 'config', 'client.config.json');
 const EXAMPLE_PATH = join(repoRoot, 'config', 'client.config.example.json');
 

@@ -1,0 +1,46 @@
+{
+  "$schema": "../../config/client.config.schema.json",
+  "_comment": "Reference client profile. This reproduces the original 'Acme Health' demo branding. Copy it to /config/client.config.json (and replace the values) to white-label the accelerator for a different customer. Azure IDs are intentionally placeholders — fill in your own.",
+
+  "client": {
+    "slug": "acme",
+    "name": "Acme Health",
+    "shortName": "Acme",
+    "industry": "healthcare",
+    "supportPhone": "1-800-000-0000",
+    "supportUrl": "https://www.acmehealth.org"
+  },
+
+  "brand": {
+    "productName": "Acme Health Voice Agent",
+    "assistantName": "Acme Health Virtual Assistant",
+    "tagline": "Accurate, warm, cheap to run, and provably safe member support.",
+    "colors": {
+      "primary": "#003087",
+      "secondary": "#0066CC",
+      "accent": "#00A3E0",
+      "success": "#00843D",
+      "warning": "#FFB81C",
+      "error": "#C8102E"
+    }
+  },
+
+  "azure": {
+    "subscriptionId": "<your-subscription-id>",
+    "tenantId": "<your-tenant-id>",
+    "resourceGroup": "rg-acme-dev",
+    "region": "eastus2",
+    "foundryResourceName": "aif-acme-dev",
+    "foundryProject": "agents",
+    "appInsightsName": "appi-acme-dev"
+  },
+
+  "deployments": {
+    "chat": "gpt-4o",
+    "mini": "gpt-4o-mini",
+    "embeddings": "text-embedding-3-large",
+    "realtime": "gpt-4o-realtime",
+    "modelRouter": "model-router",
+    "finetunePrefix": "acme"
+  }
+}

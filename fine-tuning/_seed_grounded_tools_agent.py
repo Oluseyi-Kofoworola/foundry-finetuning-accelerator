@@ -1,21 +1,21 @@
-"""Seed the Foundry portal with a grounded Sutter agent that wraps the
+"""Seed the Foundry portal with a grounded Acme agent that wraps the
 fine-tuned tool-calling deployment.
 
 Why this exists
 ---------------
-The Foundry portal playground for a raw model deployment (`sutter-tools-deployment`)
+The Foundry portal playground for a raw model deployment (`acme-tools-deployment`)
 does NOT automatically use the SYSTEM_PROMPT the model was trained with. If the
 demo person opens the deployment directly and uses the default
 "You are an AI assistant that helps people find information" prompt, the model
-behaves out of domain (it was trained ONLY on Sutter Member Services
+behaves out of domain (it was trained ONLY on Acme Member Services
 conversations).
 
 This script registers an *Agent* in the Foundry project so that when the demo
-person opens **Build > Agents > sutter-tools-grounded**, they get:
-  - model           : sutter-tools-deployment    (the FT model from Lab 03)
+person opens **Build > Agents > acme-tools-grounded**, they get:
+  - model           : acme-tools-deployment    (the FT model from Lab 03)
   - instructions    : the same SYSTEM_PROMPT used during training
-  - function tools  : the 5 Sutter tool schemas (verify_member_identity, ...)
-  - file_search     : grounded over data/sutter_health_kb.md (vector store)
+  - function tools  : the 5 Acme tool schemas (verify_member_identity, ...)
+  - file_search     : grounded over data/acme_health_kb.md (vector store)
 
 The agent is idempotent: if it already exists with the same name, it is
 deleted and recreated so the latest prompt / KB are picked up.
@@ -43,8 +43,8 @@ HERE = Path(__file__).resolve().parent  # .../fine-tuning
 load_dotenv(HERE / ".env")
 
 DATA_DIR        = HERE / "data"
-SCHEMA_PATH     = DATA_DIR / "sutter_tools_schema.json"
-KB_PATH         = DATA_DIR / "sutter_health_kb.md"
+SCHEMA_PATH     = DATA_DIR / "acme_tools_schema.json"
+KB_PATH         = DATA_DIR / "acme_health_kb.md"
 AGENT_ID_MARKER = HERE / ".tools_agent_id"
 
 # ----------------------------------------------------------------------------
@@ -55,12 +55,12 @@ PROJECT  = os.environ.get("AZURE_FOUNDRY_PROJECT", "agents")
 ENDPOINT = f"https://{ACCOUNT}.services.ai.azure.com/api/projects/{PROJECT}"
 
 # The FT deployment created by Lab 03
-TOOLS_DEPLOYMENT = "sutter-tools-deployment"
-AGENT_NAME       = "sutter-tools-grounded"
+TOOLS_DEPLOYMENT = "acme-tools-deployment"
+AGENT_NAME       = "acme-tools-grounded"
 
 # Same SYSTEM_PROMPT the FT model saw during training (Lab 03 Step 4)
 SYSTEM_PROMPT = (
-    "You are a Sutter Health Member Services voice assistant. Use the "
+    "You are a Acme Health Member Services voice assistant. Use the "
     "available tools to verify identity, look up prescriptions, request "
     "refills, find in-network providers, and calculate medication prices. "
     "Always verify identity before disclosing protected health information."
@@ -71,9 +71,9 @@ INSTRUCTIONS = (
     SYSTEM_PROMPT
     + "\n\n"
     + "GROUNDING RULES (read carefully):\n"
-    "1. You have a `file_search` tool attached to the Sutter Health Member "
-    "Services knowledge base (sutter_health_kb.md). You MUST call "
-    "`file_search` BEFORE answering ANY question about Sutter policies, "
+    "1. You have a `file_search` tool attached to the Acme Health Member "
+    "Services knowledge base (acme_health_kb.md). You MUST call "
+    "`file_search` BEFORE answering ANY question about Acme policies, "
     "benefits, copays, formulary tiers, mail-order rules, refill windows, "
     "2FA, financial assistance, plan tiers (Bronze/Silver/Gold/Platinum), "
     "telehealth, identity verification policy, or appointment scheduling. "
@@ -103,11 +103,11 @@ def main() -> int:
         print(f"[ERROR] missing {KB_PATH}", flush=True)
         return 1
 
-    sutter_tools = json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
+    acme_tools = json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
     print(f"endpoint   : {ENDPOINT}", flush=True)
     print(f"deployment : {TOOLS_DEPLOYMENT}", flush=True)
     print(f"agent name : {AGENT_NAME}", flush=True)
-    print(f"functions  : {len(sutter_tools)}  ({', '.join(t['function']['name'] for t in sutter_tools)})", flush=True)
+    print(f"functions  : {len(acme_tools)}  ({', '.join(t['function']['name'] for t in acme_tools)})", flush=True)
     print(f"kb file    : {KB_PATH.name}  ({KB_PATH.stat().st_size:,} bytes)", flush=True)
 
     cred   = DefaultAzureCredential()
@@ -141,19 +141,19 @@ def main() -> int:
 
     vs = client.vector_stores.create_and_poll(
         file_ids=[f.id],
-        name="sutter-health-kb-vs",
+        name="acme-health-kb-vs",
     )
     print(f"  vector store: {vs.id}", flush=True)
 
     file_search = FileSearchTool(vector_store_ids=[vs.id])
 
     # ------------------------------------------------------------------
-    # 3. Build combined tool list: file_search + 5 Sutter function tools
+    # 3. Build combined tool list: file_search + 5 Acme function tools
     # ------------------------------------------------------------------
     print("\n[3/4] Assembling tool definitions...", flush=True)
-    tool_defs = list(file_search.definitions) + list(sutter_tools)
+    tool_defs = list(file_search.definitions) + list(acme_tools)
     print(f"  total tools on agent: {len(tool_defs)} "
-          f"(1 file_search + {len(sutter_tools)} functions)", flush=True)
+          f"(1 file_search + {len(acme_tools)} functions)", flush=True)
 
     # ------------------------------------------------------------------
     # 4. Create the agent
@@ -163,9 +163,9 @@ def main() -> int:
         model          = TOOLS_DEPLOYMENT,
         name           = AGENT_NAME,
         description    = (
-            "Sutter Health Member Services agent grounded in the Sutter "
+            "Acme Health Member Services agent grounded in the Acme "
             "knowledge base. Uses the fine-tuned tool-calling model from "
-            "Lab 03 (sutter-tools-deployment)."
+            "Lab 03 (acme-tools-deployment)."
         ),
         instructions   = INSTRUCTIONS,
         tools          = tool_defs,

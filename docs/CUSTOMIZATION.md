@@ -5,8 +5,8 @@ one file — [`config/client.config.json`](../config/client.config.json) — and
 command propagates it across the voice/chat app and the fine-tuning labs.
 
 The repo ships with a neutral **"Acme Health"** example so a fresh fork runs out of the
-box. A fully worked reference client (Sutter Health) lives in
-[`examples/sutter/`](../examples/sutter/).
+box. A fully worked reference client (Acme Health) lives in
+[`examples/acme/`](../examples/acme/).
 
 ---
 
@@ -50,10 +50,10 @@ npm run apply:config   # propagate values
 
 This updates:
 
-- `sutter-voice-agent/frontend/src/styles/globals.css` — brand color CSS variables
-- `sutter-voice-agent/frontend/.env.local` — `VITE_BRAND_*`
-- `sutter-voice-agent/frontend/index.html` — `<title>` + description
-- `sutter-voice-agent/backend/.env` — `BRAND_*` + `AZURE_*` (key-by-key upsert, **existing secrets preserved**)
+- `examples/voice-agent/frontend/src/styles/globals.css` — brand color CSS variables
+- `examples/voice-agent/frontend/.env.local` — `VITE_BRAND_*`
+- `examples/voice-agent/frontend/index.html` — `<title>` + description
+- `examples/voice-agent/backend/.env` — `BRAND_*` + `AZURE_*` (key-by-key upsert, **existing secrets preserved**)
 - `fine-tuning/.env` — `CLIENT_*` + `AZURE_*`
 
 Env files are upserted line-by-line, so your API keys and connection strings are never
@@ -63,7 +63,7 @@ overwritten.
 
 The apply step does **not** invent secrets. Fill these in by hand:
 
-- `sutter-voice-agent/backend/.env` — `OPENAI_API_KEY`, Azure OpenAI endpoint/keys, etc.
+- `examples/voice-agent/backend/.env` — `OPENAI_API_KEY`, Azure OpenAI endpoint/keys, etc.
   (start from `.env.example`).
 - `fine-tuning/.env` — `APPLICATIONINSIGHTS_CONNECTION_STRING`, Azure OpenAI values
   (start from `.env.example`).
@@ -72,7 +72,7 @@ The apply step does **not** invent secrets. Fill these in by hand:
 
 ```bash
 # Voice/chat app
-cd sutter-voice-agent
+cd examples/voice-agent
 npm install
 npm run dev            # backend + frontend together
 
@@ -101,7 +101,7 @@ jupyter lab            # open live-demo/ notebooks
 
 ### Frontend
 - Colors are CSS variables in `globals.css` (`:root { --brand-*: r g b }`). Tailwind maps
-  `brand-*` (and the legacy `sutter-*` alias) to those variables, so opacity modifiers
+  `brand-*` (and the legacy `acme-*` alias) to those variables, so opacity modifiers
   like `bg-brand-primary/20` keep working.
 - Text labels come from `frontend/src/brand.ts`, which reads `VITE_BRAND_*` env vars with
   generic fallbacks.
@@ -125,5 +125,5 @@ To target a different domain:
 4. Rename or replace domain tools under `backend/src/tools/` (and update their references
    in the scenario `enabledTools` lists).
 
-See [`examples/sutter/`](../examples/sutter/) for a complete worked client as a starting
+See [`examples/acme/`](../examples/acme/) for a complete worked client as a starting
 point.

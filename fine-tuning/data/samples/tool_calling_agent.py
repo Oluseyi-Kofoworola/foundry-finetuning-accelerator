@@ -4,7 +4,7 @@ from openai import AzureOpenAI
 
 client = AzureOpenAI()
 
-# 12 Sutter tool schemas, re-sent on every request.
+# 12 Acme tool schemas, re-sent on every request.
 tools = [
     verify_member_identity_schema,
     lookup_prescription_schema,

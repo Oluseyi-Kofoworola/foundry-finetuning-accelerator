@@ -1,6 +1,6 @@
 # =============================================================================
 # Repo-wide ignore rules. Per-project .gitignore files add more (see
-# sutter-voice-agent/.gitignore).
+# examples/voice-agent/.gitignore).
 # =============================================================================
 
 # ----- Secrets & local environment (NEVER commit real values) -----
@@ -31,6 +31,9 @@ frontend-build.log
 # Headless notebook test harness + its output (local dev only)
 fine-tuning/_run_nb.py
 fine-tuning/_results.txt
+fine-tuning/_retest*.txt
+# Personal VS Code workspace files (machine-specific)
+*.code-workspace
 
 # ----- Python -----
 .venv/
@@ -50,10 +53,6 @@ build/
 
 # ----- Client customization (each fork fills these in locally) -----
 /config/client.config.json
-
-# ----- Separate project with its own git repo (do not nest here) -----
-# sutter-voice-agent is published independently at its own remote.
-sutter-voice-agent/
 
 # ----- OS / Editor -----
 .DS_Store

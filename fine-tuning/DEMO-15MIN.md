@@ -1,4 +1,4 @@
-# Sutter Health · Foundry Demo — 15-Minute Showcase Script
+# Acme Health · Foundry Demo — 15-Minute Showcase Script
 
 A ruthlessly tight cut of the full walkthrough. One story: *a generic model can't run a
 health plan — Foundry makes it correct, cheap, safe, agentic, and provable.* Six moments,
@@ -18,7 +18,7 @@ health plan — Foundry makes it correct, cheap, safe, agentic, and provable.* S
 |-----:|-----|-------------------------|
 | 0:00–1:00 | Opening frame | The stakes: trust, cost, compliance |
 | 1:00–3:30 | **01 · SFT** | Generic guesses; fine-tuned *knows* ($20 copay) |
-| 3:30–5:00 | **02 · DPO** | Same facts, Sutter bedside manner |
+| 3:30–5:00 | **02 · DPO** | Same facts, Acme bedside manner |
 | 5:00–7:00 | **03 · Tool-calling** | Same call, ~80% fewer tokens = millions/mo |
 | 7:00–8:30 | **08 · Guardrails** | 3 jailbreaks → 3 refusals, 0 leaks |
 | 8:30–12:00 | **18b · Imaging flow** | Multimodal + multi-agent tumor board, live |
@@ -32,10 +32,10 @@ health plan — Foundry makes it correct, cheap, safe, agentic, and provable.* S
 
 ## 0:00 — Opening frame (60 sec)
 
-> "You're on the phone with Sutter Health: *what's my copay, when does my prescription
+> "You're on the phone with Acme Health: *what's my copay, when does my prescription
 > arrive, is this covered.* A generic chatbot answers confidently — and is sometimes
 > wrong. In healthcare, wrong isn't an option. In the next fifteen minutes I'll turn a
-> generic model into a Sutter agent that's **accurate, warm, cheap, safe, and agentic** —
+> generic model into a Acme agent that's **accurate, warm, cheap, safe, and agentic** —
 > and I'll prove every claim."
 
 Name the three stakes once: **trust, cost, compliance.** Every moment pays back one.
@@ -51,7 +51,7 @@ Name the three stakes once: **trust, cost, compliance.** Every moment pays back 
 3. Read the fine-tuned answer — it returns **$20**, the exact KB number.
 
 > "Same model family, same prompt. The base one improvises; the tuned one *knows*. That's
-> the difference between a generic chatbot and a Sutter agent."
+> the difference between a generic chatbot and a Acme agent."
 
 **Land it:** correctness is a training outcome, not a lucky prompt.
 
@@ -62,10 +62,10 @@ Name the three stakes once: **trust, cost, compliance.** Every moment pays back 
 **Open:** `pre-demo/02_direct_preference_optimization.ipynb`
 
 1. Read the emotional prompt aloud — a member who just got a cancer diagnosis.
-2. Base answer: correct but cold. DPO answer: leads with empathy, then concrete Sutter
+2. Base answer: correct but cold. DPO answer: leads with empathy, then concrete Acme
    next steps.
 
-> "We didn't add a single fact. We taught it how Sutter wants members to *feel*."
+> "We didn't add a single fact. We taught it how Acme wants members to *feel*."
 
 ---
 
@@ -151,13 +151,13 @@ live trace — the who-saw-what audit trail reviewers ask for.
 - [ ] All six notebooks **pre-run** so outputs render instantly; scroll positions set near
       each money-shot cell.
 - [ ] Deployments live: `gpt-4o`, `gpt-4o-mini`, `text-embedding-3-large`, `model-router`,
-      `sutter-sft` / `sutter-dpo` / `sutter-tools`.
+      `acme-sft` / `acme-dpo` / `acme-tools`.
 - [ ] Foundry **Tracing** tab open (for 18b + 09).
 - [ ] Browser zoom up; output cells visible without horizontal scroll.
 
 ## If something breaks on stage
 
 - **Don't live-run.** Every money shot is already rendered — just scroll to it.
-- A skip message (`[skip] set SUTTER_WORKFLOW_NAME …`, `unavailable (mock)`) is **expected
+- A skip message (`[skip] set ACME_WORKFLOW_NAME …`, `unavailable (mock)`) is **expected
   fallback behavior**, not an error — say "that's the graceful-degradation path" and move on.
 - Out of time? Compress to the spine: **01 → 03 → 18b → 09**. That alone tells the whole story.

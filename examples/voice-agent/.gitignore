@@ -1,0 +1,110 @@
+# Dependencies
+node_modules/
+.pnp/
+.pnp.js
+
+# Build outputs
+dist/
+build/
+out/
+.next/
+.nuxt/
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+backend/.env
+frontend/.env
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage
+coverage/
+*.lcov
+.nyc_output/
+
+# IDE / Editor
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+*.sublime-project
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# TypeScript
+*.tsbuildinfo
+
+# Testing
+.jest/
+jest-results/
+
+# Temporary files
+tmp/
+temp/
+.tmp/
+.temp/
+*.tmp
+*.temp
+
+# Uploads (local development)
+uploads/
+/tmp/uploads/
+
+# Cache
+.cache/
+.parcel-cache/
+.eslintcache
+.stylelintcache
+
+# Vite
+*.local
+
+# Misc
+*.gz
+*.tgz
+*.zip
+*.tar
+.terraform/
+*.tfstate
+*.tfstate.*
+
+# Package manager locks (keep package-lock.json, ignore others if not used)
+yarn.lock
+pnpm-lock.yaml
+
+# Azure
+.azure/
+azure.json
+node_modules

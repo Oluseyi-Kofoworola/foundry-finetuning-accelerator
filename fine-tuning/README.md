@@ -1,22 +1,58 @@
-# Fine-Tuning Microsoft Foundry — Healthcare Example
+# Fine-Tuning Labs — Azure AI Foundry
 
-Four hands-on labs that teach **Azure OpenAI fine-tuning** end-to-end, themed
-around a healthcare voice agent example (default brand: **Acme Health**). All labs
-run as Jupyter notebooks inside VS Code — no portal clicks, no extra tooling.
+> **Turn a generic LLM model e.g `gpt-4o-mini` into a customized, evaluated, production-ready
+> assistant — and prove every step live.** 20 notebooks, no portal clicks, no
+> throwaway demo code.
 
-> Adapted from [Shailender-Youtube/Fine-Tuning-Microsoft-Foundry](https://github.com/Shailender-Youtube/Fine-Tuning-Microsoft-Foundry)
-> and rethemed for a healthcare member-services scenario. The healthcare domain is a
-> swappable example — re-theme the data files for your own use case.
+## You're the one who has to prove it works
+
+You're an engineer, solution architect, or AI practitioner, and someone just
+asked the hard question: *"Can you actually **customize and operationalize** a
+model on Azure AI Foundry — not just call an API?"*
+
+**The problem.** Answering that normally means hand-building a fragile demo
+under time pressure — and even then it covers one slice of the lifecycle, not
+the whole thing. You can *say* fine-tuning, RAG, guardrails, and evaluation
+work. Showing all of them, end to end, on demand, is another matter.
+
+**What's at stake.** A hand-wavy "trust me, it works" costs credibility — and
+the deal. Re-building it for the next customer from scratch costs your weekend.
+
+## 20 labs that do the proving for you
+
+These labs are the path from base model to production story. Each one is a
+self-contained Jupyter notebook with a clear **demo moment** you can show on
+screen. They ship themed around a healthcare member-services assistant (default
+brand: **Acme Health**), but the domain is a **swappable example** — re-theme
+the data files in `data/` for any vertical.
+
+## Three acts
+
+1. **Train the model** (Part A) — teach a base model your facts, your tone, and
+   your tools.
+2. **Add the agent capabilities** (Part B) — RAG, memory, evaluation, and
+   guardrails every production agent needs.
+3. **Operationalize responsibly** (Part C) — security, deployment, cost
+   governance, and responsible-AI patterns.
+
+Then **[the voice agent](#how-this-connects-back-to-the-voice-agent) runs the
+result** — so the labs aren't academic, they produce something a real app uses.
+
+### Start here
+
+Run **[Lab 00](00_synthetic_data_generation.ipynb)** — in 1–2 minutes a single
+markdown file becomes a full training set. That's the moment the story starts.
+(Setup is below if you haven't configured Azure yet.)
 
 ---
 
-## What's in this folder
+## The labs in detail
 
 ### Part A — Fine-tuning labs (training a model)
 
 | # | Lab | What it teaches | Demo moment |
 |---|-----|-----------------|-------------|
-| 00 | [Synthetic Data Generation](00_synthetic_data_generation.ipynb) | Turn `sutter_health_kb.md` into 50–80 grounded Q&A training pairs using a deployed chat model | "Look — the model just generated its own training set from a markdown file." |
+| 00 | [Synthetic Data Generation](00_synthetic_data_generation.ipynb) | Turn `acme_health_kb.md` into 50–80 grounded Q&A training pairs using a deployed chat model | "Look — the model just generated its own training set from a markdown file." |
 | 01 | [Supervised Fine-Tuning (SFT)](01_supervised_fine_tuning.ipynb) | Teach the model **facts** — Acme copays, cutoff times, policies the base model can't possibly know | Base hallucinates `$15`; fine-tuned model says exact `$20` from the KB |
 | 02 | [Direct Preference Optimization (DPO)](02_direct_preference_optimization.ipynb) | Teach the model **tone & empathy** — pick the warm Acme response over the cold textbook one | "I just got diagnosed with cancer" → base gives boilerplate; DPO leads with empathy + concrete next steps |
 | 03 | [Tool Calling Fine-Tuning](03_tool_calling_fine_tuning.ipynb) | Bake the example tool schemas into the model so you can drop tool descriptions — or the whole `tools=[]` array — at inference | Same correct `verify_member_identity` call with **~80% fewer prompt tokens** |
@@ -33,6 +69,24 @@ Each runs in 2–5 minutes against the already-deployed `gpt-4o-mini`. Use them 
 | 07 | [Evaluation](07_evaluation.ipynb) | Build a 5-case eval set scored three ways: keyword, LLM-as-judge, and a printable scoreboard | One scoreboard per release — replaces "the model felt better today" with numbers |
 | 08 | [Guardrails](08_guardrails.ipynb) | The four-layer guardrail stack: hardened system prompt, PII scrubber, out-of-scope refusal, jailbreak defense | Send 3 jailbreak attempts at the agent — watch all 3 get refused politely |
 | 09 | [Foundry Decision Advisor](pre-demo/09_foundry_decision_advisor.ipynb) | The "should I use Foundry?" lab — drop in a code sample or task and it recommends a model (with rationale + cost/latency/accuracy tradeoff), maps each gap to a Foundry capability + the lab that proves it, and emits a structured decision trace | Paste a first-draft RAG chatbot → advisor flags 6 gaps and routes each to SFT / RAG / eval / guardrails / routing / tracing |
+
+### Part C — Production & governance labs (no training required)
+
+Run against the base `gpt-4o-mini` deployment — the patterns you need to take a
+customized model to production responsibly.
+
+| # | Lab | What it teaches |
+|---|-----|-----------------|
+| 10 | [Security & Compliance](live-demo/10_security_compliance.ipynb) | PHI/PII handling, audit logging, and compliance-aware patterns |
+| 11 | [Agents Orchestration](live-demo/11_agents_orchestration.ipynb) | Coordinate multiple specialized agents behind one entry point |
+| 12 | [Production Deployment](live-demo/12_production_deployment.ipynb) | Ship a tuned model and wire it for real traffic |
+| 13 | [Continuous Evaluation](live-demo/13_continuous_evaluation.ipynb) | Keep scoring quality after launch, not just before |
+| 14 | [Cost Governance](live-demo/14_cost_governance.ipynb) | Track, attribute, and cap spend across deployments |
+| 15 | [Migration Path](live-demo/15_migration_path.ipynb) | Move between models/approaches without rewrites |
+| 16 | [Reasoning (RFT)](live-demo/16_reasoning_rft.ipynb) | Reinforcement fine-tuning for multi-step reasoning |
+| 17 | [Responsible AI](live-demo/17_responsible_ai.ipynb) | Fairness, transparency, and safety checks |
+| 18 | [Agent Flow](live-demo/18_agent_flow.ipynb) | End-to-end agentic workflow tying the pieces together |
+| 18b | [Imaging Agent Flow](live-demo/18b_imaging_agent_flow.ipynb) | Multimodal / imaging variant of the agent workflow |
 
 ### Lab 09 — Foundry Decision Advisor (the "is Foundry worth it?" capstone)
 
@@ -62,10 +116,10 @@ Application Insights → the Foundry **Tracing** tab.
 
 Plus shared data files in `data/`:
 
-- `sutter_health_kb.md` — healthcare knowledge base (pharmacy, plans, member health org, billing)
-- `sutter_dpo_training_data.json` — 12 preference pairs (cold vs warm answers)
-- `sutter_tools_schema.json` — 5 example tools (matches the live demo agents)
-- `sutter_tool_calling_training_data.json` — 12 multi-turn tool-calling traces
+- `acme_health_kb.md` — healthcare knowledge base (pharmacy, plans, member health org, billing)
+- `acme_dpo_training_data.json` — 12 preference pairs (cold vs warm answers)
+- `acme_tools_schema.json` — 5 example tools (matches the live demo agents)
+- `acme_tool_calling_training_data.json` — 12 multi-turn tool-calling traces
 - `foundry_model_catalog.json` — deployment catalog (cost/latency/accuracy) used by Lab 09
 - `samples/rag_chatbot.py`, `samples/tool_calling_agent.py` — sample inputs for the Lab 09 advisor
 
@@ -154,7 +208,7 @@ Pick the `.venv` kernel inside any notebook (top right → **Select Kernel** →
 
 You **must** run Lab 00 before Lab 01 (it produces the JSONL files Lab 01
 consumes). Labs 02 and 03 are independent — you can run them in any order
-after Lab 00. Labs 04–08 only need the base `gpt-4o-mini` deployment and
+after Lab 00. Labs 04–18b only need the base `gpt-4o-mini` deployment and
 can run in any order at any time.
 
 ---
@@ -162,8 +216,8 @@ can run in any order at any time.
 ## What to highlight when presenting
 
 ### Lab 00 — Synthetic Data
-- One markdown file (`sutter_health_kb.md`) becomes a full training set.
-- Generated pairs are saved to `data/sutter_training.jsonl` (UTF-8 with BOM —
+- One markdown file (`acme_health_kb.md`) becomes a full training set.
+- Generated pairs are saved to `data/acme_training.jsonl` (UTF-8 with BOM —
   Azure requirement).
 - Cost: a few cents on `gpt-4o-mini`.
 
@@ -226,10 +280,28 @@ To also delete the model weights, go to the Foundry portal → your resource →
 
 ## How this connects back to the voice agent
 
-The tools in `sutter_tools_schema.json` — `verify_member_identity`,
+The tools in `acme_tools_schema.json` — `verify_member_identity`,
 `lookup_prescriptions`, `request_refill`, `find_in_network_providers`,
 `calculate_medication_price` — are a **direct subset of the real tools** the
-voice agent in [`sutter-voice-agent/backend/src/tools/`](../sutter-voice-agent/backend/src/tools)
+companion voice agent in [`examples/voice-agent/backend/src/tools/`](../examples/voice-agent/backend/src/tools)
 uses today. The fine-tuned model from Lab 03 could literally be swapped into
 the agent and dispatch the same five tools with a fraction of the prompt
-overhead.
+overhead — that's the whole point: **the labs customize the model, the voice
+agent is the real app that runs it.**
+
+---
+
+## What you walk away with
+
+Work through the three acts and you no longer *describe* Foundry — you
+**demonstrate** it:
+
+- A model that knows **your** facts, speaks in **your** tone, and calls **your**
+  tools — proven side-by-side against the base model.
+- The production scaffolding around it: retrieval, memory, evaluation
+  scoreboards, guardrails, cost controls, and responsible-AI checks.
+- A repeatable story you can **re-skin for the next customer in minutes** by
+  swapping `data/` and the config — never rebuilt from scratch.
+- Verified, not hypothetical: every notebook has been run live against Azure.
+
+That's the difference between "trust me, it works" and "watch it work."

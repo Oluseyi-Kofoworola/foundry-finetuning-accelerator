@@ -106,7 +106,7 @@ def lab10() -> list[dict]:
             "# Lab 10 · Security, Compliance & Data Residency (HIPAA/PHI)\n\n"
             "Before a health system moves a single transcript to the cloud, one "
             "question outranks every benchmark: *where does our PHI live, and who "
-            "can touch it?* This lab shows the four guarantees that let Sutter run "
+            "can touch it?* This lab shows the four guarantees that let Acme run "
             "Member Services on Foundry under a **HIPAA BAA** — your fine-tuning "
             "data never trains the base model, it stays **in your resource, in your "
             "region**, reachable only through **private endpoints**, encrypted with "
@@ -285,7 +285,7 @@ def lab11() -> list[dict]:
             "    print('[skip] Foundry Agent Service unavailable:', type(e).__name__, e)\n"
         ),
         md(
-            "---\n## Step 2 — Register an agent with Sutter tools\n\n"
+            "---\n## Step 2 — Register an agent with Acme tools\n\n"
             "We give the agent three Member Services functions and let Foundry decide "
             "when to call each. The functions run **locally** (your business logic); "
             "the agent only orchestrates.\n"
@@ -305,7 +305,7 @@ def lab11() -> list[dict]:
             "def request_refill(member_id: str, drug_name: str) -> str:\n"
             "    return json.dumps({'drug': drug_name, 'refill': 'submitted', 'eta_days': 2})\n"
             "\n"
-            "SYSTEM = ('You are a Sutter Health Member Services agent. Verify identity '\n"
+            "SYSTEM = ('You are a Acme Health Member Services agent. Verify identity '\n"
             "          'before disclosing PHI, then help with prescriptions and refills. '\n"
             "          'Use tools; never invent prescription data.')\n"
             "\n"
@@ -319,7 +319,7 @@ def lab11() -> list[dict]:
             "                                            request_refill}))\n"
             "        agents.enable_auto_function_calls(toolset)\n"
             "        agent = agents.create_agent(model=os.environ.get('BASE_DEPLOYMENT', 'gpt-4o-mini'),\n"
-            "                                    name='sutter-orchestration-demo',\n"
+            "                                    name='acme-orchestration-demo',\n"
             "                                    instructions=SYSTEM, toolset=toolset)\n"
             "        print('Agent created:', agent.id)\n"
             "    except Exception as e:\n"
@@ -436,8 +436,8 @@ def lab12() -> list[dict]:
             "client = try_build_client()\n"
             "\n"
             "# Stable alias your app imports; swapping its value is the deploy.\n"
-            "ALIAS = {'sutter-prod': 'sutter-sft-deployment'}  # BLUE (current prod)\n"
-            "GREEN = 'sutter-dpo-deployment'                    # candidate next version\n"
+            "ALIAS = {'acme-prod': 'acme-sft-deployment'}  # BLUE (current prod)\n"
+            "GREEN = 'acme-dpo-deployment'                    # candidate next version\n"
             "\n"
             "def ask(deployment, prompt):\n"
             "    if client is None:\n"
@@ -446,27 +446,27 @@ def lab12() -> list[dict]:
             "        messages=[{'role': 'user', 'content': prompt}])\n"
             "    return r.choices[0].message.content.strip()\n"
             "\n"
-            "SMOKE = 'In one sentence, how do I refill a prescription with Sutter?'\n"
+            "SMOKE = 'In one sentence, how do I refill a prescription with Acme?'\n"
             "\n"
-            "print('BLUE  (', ALIAS['sutter-prod'], '):', ask(ALIAS['sutter-prod'], SMOKE)[:120])\n"
+            "print('BLUE  (', ALIAS['acme-prod'], '):', ask(ALIAS['acme-prod'], SMOKE)[:120])\n"
             "green_answer = ask(GREEN, SMOKE)\n"
             "print('GREEN (', GREEN, '):', green_answer[:120])\n"
             "\n"
             "smoke_ok = bool(green_answer) and 'refill' in green_answer.lower()\n"
             "if smoke_ok:\n"
-            "    ALIAS['sutter-prod'] = GREEN      # PROMOTE\n"
-            "    print('\\n✅ Smoke test passed -> promoted prod to', ALIAS['sutter-prod'])\n"
+            "    ALIAS['acme-prod'] = GREEN      # PROMOTE\n"
+            "    print('\\n✅ Smoke test passed -> promoted prod to', ALIAS['acme-prod'])\n"
             "else:\n"
-            "    print('\\n⚠️ Smoke test failed -> kept prod on', ALIAS['sutter-prod'])\n"
+            "    print('\\n⚠️ Smoke test failed -> kept prod on', ALIAS['acme-prod'])\n"
         ),
         md(
             "---\n## Step 3 — One-line rollback\n\n"
             "If post-deploy metrics dip, revert instantly. No redeploy, no downtime.\n"
         ),
         code(
-            "PREVIOUS = 'sutter-sft-deployment'\n"
-            "ALIAS['sutter-prod'] = PREVIOUS   # rollback\n"
-            "print('↩️  Rolled back: sutter-prod ->', ALIAS['sutter-prod'])\n"
+            "PREVIOUS = 'acme-sft-deployment'\n"
+            "ALIAS['acme-prod'] = PREVIOUS   # rollback\n"
+            "print('↩️  Rolled back: acme-prod ->', ALIAS['acme-prod'])\n"
         ),
         md(
             "---\n## Step 4 — Replace-in-production: PTU + CI/CD\n\n"
@@ -482,11 +482,11 @@ def lab12() -> list[dict]:
             "# --- replace-in-production: deploy + smoke + promote (Azure CLI) ---\n"
             "# 1) create GREEN deployment (PTU example)\n"
             "az cognitiveservices account deployment create \\\\\n"
-            "  -g $RG -n $ACCT --deployment-name sutter-green \\\\\n"
+            "  -g $RG -n $ACCT --deployment-name acme-green \\\\\n"
             "  --model-name gpt-4o --model-version 2024-08-06 \\\\\n"
             "  --sku-name ProvisionedManaged --sku-capacity 50\n"
             "# 2) run eval gate (Lab 07/13) -> must pass\n"
-            "# 3) promote: point your app config alias 'sutter-prod' at sutter-green\n"
+            "# 3) promote: point your app config alias 'acme-prod' at acme-green\n"
             "# 4) rollback: point alias back at the previous deployment\n"
             "'''\n"
             "print(CICD_REFERENCE)\n"
@@ -554,7 +554,7 @@ def lab13() -> list[dict]:
             "    if isinstance(keys, str):\n"
             "        keys = [keys]\n"
             "    if client is None or not q:\n"
-            "        ans = '[mock] refill via the Sutter app or mail order'\n"
+            "        ans = '[mock] refill via the Acme app or mail order'\n"
             "    else:\n"
             "        resp = client.chat.completions.create(model=DEPLOY, max_tokens=120,\n"
             "            messages=[{'role': 'user', 'content': q}])\n"
@@ -576,10 +576,10 @@ def lab13() -> list[dict]:
             "# Publish as an OTel metric -> App Insights (no-op if tracing disabled).\n"
             "try:\n"
             "    from opentelemetry import metrics\n"
-            "    meter = metrics.get_meter('sutter.continuous_eval')\n"
-            "    g = meter.create_gauge('sutter.quality_score')\n"
+            "    meter = metrics.get_meter('acme.continuous_eval')\n"
+            "    g = meter.create_gauge('acme.quality_score')\n"
             "    g.set(avg, {'deployment': DEPLOY})\n"
-            "    print('Metric sutter.quality_score emitted ->', DEPLOY)\n"
+            "    print('Metric acme.quality_score emitted ->', DEPLOY)\n"
             "except Exception as e:\n"
             "    print('[metric skipped]', type(e).__name__, e)\n"
             "\n"
@@ -601,7 +601,7 @@ def lab13() -> list[dict]:
             "# 3) Alert on the emitted metric:\n"
             "az monitor metrics alert create -g $RG -n quality-drift \\\\\n"
             "  --scopes $APPINSIGHTS_ID \\\\\n"
-            "  --condition \"avg customMetrics/sutter.quality_score < 0.70\" \\\\\n"
+            "  --condition \"avg customMetrics/acme.quality_score < 0.70\" \\\\\n"
             "  --window-size 15m --evaluation-frequency 5m \\\\\n"
             "  --action $ACTION_GROUP_ID\n"
             "# (Foundry: Evaluations -> Continuous evaluation can do this in-portal too.)\n"
@@ -723,7 +723,7 @@ def lab14() -> list[dict]:
             "    used = r.usage.total_tokens if r.usage else 0\n"
             "    return r.choices[0].message.content, round(PER_1K * used / 1000, 5)\n"
             "\n"
-            "ans, cost = capped_chat('Summarize Sutter mail-order refill rules in 2 sentences.')\n"
+            "ans, cost = capped_chat('Summarize Acme mail-order refill rules in 2 sentences.')\n"
             "print('Answer:', (ans or '')[:140])\n"
             "print(f'Capped at {MAX_OUTPUT_TOKENS} output tokens; est. cost this call: ${cost}')\n"
         ),
@@ -808,7 +808,7 @@ def lab15() -> list[dict]:
             "    api_version=os.environ.get('AZURE_OPENAI_API_VERSION', '2025-04-01-preview'),\n"
             "    azure_ad_token_provider=token_provider)          # <- no API key\n"
             "\n"
-            "prompt = 'In one sentence, what is Sutter Health Member Services?'\n"
+            "prompt = 'In one sentence, what is Acme Health Member Services?'\n"
             "resp = client.chat.completions.create(\n"
             "    model=os.environ.get('BASE_DEPLOYMENT', 'gpt-4o-mini'),  # deployment name\n"
             "    max_tokens=80,\n"
@@ -890,7 +890,7 @@ def lab16() -> list[dict]:
             "        messages=[{'role': 'user', 'content': prompt}])\n"
             "    return (r.choices[0].message.content or ''), r.model\n"
             "\n"
-            "trivial = 'What are Sutter customer service hours?'\n"
+            "trivial = 'What are Acme customer service hours?'\n"
             "hard = ('A member has Gold plan primary and Bronze secondary coverage. '\n"
             "        'A $4,200 procedure applies; primary covers 80% after a $500 '\n"
             "        'deductible already met, secondary covers 50% of the remainder '\n"
@@ -912,7 +912,7 @@ def lab16() -> list[dict]:
         ),
         code(
             "RFT_JOB = {\n"
-            "    'training_file': 'data/sutter_reasoning_rft.jsonl',\n"
+            "    'training_file': 'data/acme_reasoning_rft.jsonl',\n"
             "    'model': 'o4-mini',                 # a fine-tunable reasoning base\n"
             "    'method': {\n"
             "        'type': 'reinforcement',\n"
@@ -999,7 +999,7 @@ def lab17() -> list[dict]:
             "client = try_build_client()\n"
             "DEPLOY = os.environ.get('BASE_DEPLOYMENT', 'gpt-4o-mini')\n"
             "\n"
-            "GUARD = ('You are a Sutter Member Services assistant. Refuse anything unsafe, '\n"
+            "GUARD = ('You are a Acme Member Services assistant. Refuse anything unsafe, '\n"
             "         'out-of-scope, or requesting PHI without verified identity. '\n"
             "         'Never provide medical diagnosis or self-harm instructions.')\n"
             "\n"
@@ -1033,7 +1033,7 @@ def lab17() -> list[dict]:
             "    print('[mock] content filter: all categories safe')\n"
             "else:\n"
             "    r = client.chat.completions.create(model=DEPLOY, max_tokens=60,\n"
-            "        messages=[{'role': 'user', 'content': 'How do I schedule a flu shot at Sutter?'}])\n"
+            "        messages=[{'role': 'user', 'content': 'How do I schedule a flu shot at Acme?'}])\n"
             "    cfr = getattr(r.choices[0], 'content_filter_results', None) \\\n"
             "          or (r.choices[0].model_extra or {}).get('content_filter_results')\n"
             "    print('Answer:', (r.choices[0].message.content or '')[:100])\n"
@@ -1056,13 +1056,13 @@ def lab17() -> list[dict]:
         code(
             "from pathlib import Path\n"
             "import re\n"
-            "kb = Path('data/sutter_health_kb.md')\n"
+            "kb = Path('data/acme_health_kb.md')\n"
             "kb_text = kb.read_text(encoding='utf-8').lower() if kb.exists() else ''\n"
             "\n"
-            "claim = 'Refills can be requested via the Sutter app or by mail order.'\n"
+            "claim = 'Refills can be requested via the Acme app or by mail order.'\n"
             "if client is not None and kb_text:\n"
             "    r = client.chat.completions.create(model=DEPLOY, max_tokens=80,\n"
-            "        messages=[{'role': 'system', 'content': 'Answer only from Sutter policy.'},\n"
+            "        messages=[{'role': 'system', 'content': 'Answer only from Acme policy.'},\n"
             "                  {'role': 'user', 'content': 'How can a member request a refill?'}])\n"
             "    claim = r.choices[0].message.content or claim\n"
             "\n"
@@ -1112,19 +1112,19 @@ def lab17() -> list[dict]:
 # Emit
 # --------------------------------------------------------------------------- #
 LABS = {
-    "10_security_compliance.ipynb":   (lab10, "sutter-security-lab"),
-    "11_agents_orchestration.ipynb":  (lab11, "sutter-agents-lab"),
-    "12_production_deployment.ipynb": (lab12, "sutter-production-lab"),
-    "13_continuous_evaluation.ipynb": (lab13, "sutter-conteval-lab"),
-    "14_cost_governance.ipynb":       (lab14, "sutter-cost-lab"),
-    "15_migration_path.ipynb":        (lab15, "sutter-migration-lab"),
-    "16_reasoning_rft.ipynb":         (lab16, "sutter-reasoning-lab"),
-    "17_responsible_ai.ipynb":        (lab17, "sutter-rai-lab"),
+    "10_security_compliance.ipynb":   (lab10, "acme-security-lab"),
+    "11_agents_orchestration.ipynb":  (lab11, "acme-agents-lab"),
+    "12_production_deployment.ipynb": (lab12, "acme-production-lab"),
+    "13_continuous_evaluation.ipynb": (lab13, "acme-conteval-lab"),
+    "14_cost_governance.ipynb":       (lab14, "acme-cost-lab"),
+    "15_migration_path.ipynb":        (lab15, "acme-migration-lab"),
+    "16_reasoning_rft.ipynb":         (lab16, "acme-reasoning-lab"),
+    "17_responsible_ai.ipynb":        (lab17, "acme-rai-lab"),
 }
 
 FOLDERS = {
     "pre-demo": None,             # use the per-lab pre-demo service name
-    "live-demo": "sutter-live-demo",
+    "live-demo": "acme-live-demo",
 }
 
 

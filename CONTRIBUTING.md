@@ -8,20 +8,20 @@ push customer-specific content into config or `examples/`.
 
 1. **Never hardcode a customer name, color, phone number, or Azure resource
    name** in shared code. Read it from:
-   - the app config (`sutter-voice-agent/backend/src/utils/config.ts` → `brand`)
+   - the app config (`examples/voice-agent/backend/src/utils/config.ts` → `brand`)
    - frontend brand env (`VITE_BRAND_*`) / CSS variables
    - `config/client.config.json` (propagated via `npm run apply:config`)
 2. **Never commit secrets.** Subscription IDs, tenant IDs, connection strings,
    API keys, and generated `agent-ids.json` belong only in gitignored `.env` /
    runtime files. Add a `*.example` template instead.
 3. **Keep the reference example working.** If you change config plumbing, verify
-   `examples/sutter/client.config.json` still applies cleanly.
+   `examples/acme/client.config.json` still applies cleanly.
 
 ## Development
 
 ```bash
 # Voice agent
-cd sutter-voice-agent && npm run install:all && npm run dev
+cd examples/voice-agent && npm run install:all && npm run dev
 npm run lint && npm run build      # before opening a PR
 
 # Fine-tuning labs
@@ -32,7 +32,7 @@ cd fine-tuning && pip install -r requirements.txt && python preflight.py
 
 - Keep changes focused; describe what a forker needs to do (if anything) after
   pulling your change.
-- Run `npm run lint` and `npm run build` in `sutter-voice-agent/`.
+- Run `npm run lint` and `npm run build` in `examples/voice-agent/`.
 - Do not include generated artifacts (`dist/`, logs, `.env*` with real values).
 
 ## Reporting issues

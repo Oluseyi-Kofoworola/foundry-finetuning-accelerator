@@ -1,4 +1,4 @@
-"""Smoke-test the grounded sutter-tools agent end-to-end.
+"""Smoke-test the grounded acme-tools agent end-to-end.
 
 1. PHI/action prompt -> expect a verify_member_identity function tool call
    (proves the FT model + SYSTEM_PROMPT + function tools are wired correctly).
@@ -108,10 +108,10 @@ run_turn(
     },
 )
 
-# 2. KB prompt — should answer from sutter_health_kb.md with citations
+# 2. KB prompt — should answer from acme_health_kb.md with citations
 run_turn(
     label="Test 2 — Policy/KB prompt -> expect grounded answer + file citation",
-    user_msg="What are the Sutter Health Plus formulary tiers and what is my Tier 1 generic 30-day copay?",
+    user_msg="What are the Acme Health Plus formulary tiers and what is my Tier 1 generic 30-day copay?",
 )
 
 print("\nDone.")

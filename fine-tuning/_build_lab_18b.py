@@ -286,7 +286,7 @@ def lab18b() -> list[dict]:
             "if agents is not None:\n"
             "    try:\n"
             "        findings_agent = agents.create_agent(\n"
-            "            model=MODEL, name='sutter-imaging-findings-specialist',\n"
+            "            model=MODEL, name='acme-imaging-findings-specialist',\n"
             "            instructions=(\n"
             "                'You are an oncology imaging-findings specialist. You receive a '\n"
             "                'radiology impression and a measured longest-diameter (mm) for a '\n"
@@ -299,7 +299,7 @@ def lab18b() -> list[dict]:
             "        print('Imaging-findings specialist:', findings_agent.id)\n"
             "\n"
             "        compare_agent = agents.create_agent(\n"
-            "            model=MODEL, name='sutter-prior-comparison-specialist',\n"
+            "            model=MODEL, name='acme-prior-comparison-specialist',\n"
             "            instructions=(\n"
             "                'You are a RECIST 1.1 response specialist. You receive a current '\n"
             "                'longest-diameter (mm) and a baseline longest-diameter (mm) for a '\n"
@@ -339,7 +339,7 @@ def lab18b() -> list[dict]:
             "\n"
             "        connected_defs = list(find_conn.definitions) + list(comp_conn.definitions)\n"
             "        coordinator = agents.create_agent(\n"
-            "            model=MODEL, name='sutter-tumorboard-coordinator',\n"
+            "            model=MODEL, name='acme-tumorboard-coordinator',\n"
             "            instructions=(\n"
             "                'You are the case coordinator for a research tumor board. For each '\n"
             "                'case, send the impression + current measurement to the imaging-findings '\n"
@@ -436,21 +436,21 @@ def lab18b() -> list[dict]:
         code(
             "# Three fine-tuning techniques (Labs 01-03) and where each fits a tumor board:\n"
             "FT_TECHNIQUES = [\n"
-            "    ('SFT  (Lab 01)',          'sutter-sft-deployment',\n"
+            "    ('SFT  (Lab 01)',          'acme-sft-deployment',\n"
             "     'House-style structured reports + local protocol facts.'),\n"
-            "    ('DPO  (Lab 02)',          'sutter-dpo-deployment',\n"
+            "    ('DPO  (Lab 02)',          'acme-dpo-deployment',\n"
             "     'Radiologist-approved phrasing over generic wording.'),\n"
-            "    ('Tool-calling (Lab 03)',  'sutter-tools-deployment',\n"
+            "    ('Tool-calling (Lab 03)',  'acme-tools-deployment',\n"
             "     'Reliable structured RECIST fields, ~80% fewer prompt tokens.'),\n"
             "]\n"
             "for label, dep, why in FT_TECHNIQUES:\n"
             "    print(f'  {label:<22} -> {dep:<26} {why}')\n"
             "\n"
             "# Swapping a fine-tuned model into a specialist is literally one line:\n"
-            "#     agents.create_agent(model='sutter-sft-deployment', name=..., instructions=...)\n"
+            "#     agents.create_agent(model='acme-sft-deployment', name=..., instructions=...)\n"
             "\n"
             "# LIVE: base gpt-4o-mini vs a fine-tuned deployment on the SAME task (+ token usage).\n"
-            "FT_DEPLOYMENT = os.environ.get('SUTTER_FT_DEPLOYMENT', 'sutter-tools-deployment')\n"
+            "FT_DEPLOYMENT = os.environ.get('ACME_FT_DEPLOYMENT', 'acme-tools-deployment')\n"
             "task = ('Return ONLY a compact JSON object with keys location, margins, '\n"
             "        'longest_diameter_mm, measurable_target (true/false) for this impression: '\n"
             "        + impression + f' Longest diameter is {CURRENT_LONGEST_DIAMETER_MM} mm.')\n"
@@ -576,7 +576,7 @@ def lab18b() -> list[dict]:
             "Search, code interpreter) + a portal **Workflow**, with PHI / RAI / "
             "human-in-the-loop governance.\n"
             "- **Fine-tuning is a one-line swap** per specialist "
-            "(`create_agent(model='sutter-sft-deployment')`) \u2014 SFT for house-style "
+            "(`create_agent(model='acme-sft-deployment')`) \u2014 SFT for house-style "
             "reports, DPO for preferred phrasing, tool-calling FT for cheaper "
             "structured output.\n"
             "- **Tiering is the cost lever:** reserve `gpt-4o` for the pixels, run the "
@@ -589,8 +589,8 @@ def lab18b() -> list[dict]:
 
 
 FOLDERS = {
-    "pre-demo": "sutter-imaging-flow-lab",
-    "live-demo": "sutter-live-demo",
+    "pre-demo": "acme-imaging-flow-lab",
+    "live-demo": "acme-live-demo",
 }
 
 

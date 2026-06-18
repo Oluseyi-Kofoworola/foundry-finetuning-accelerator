@@ -63,7 +63,7 @@ def make_eval_dataset() -> str:
         {"query": "Can I refill my statin 10 days early because I am traveling?",
          "ground_truth": "Yes via a vacation override; we will call the pharmacy."},
         {"query": "I just lost my job and cannot afford my inhaler.",
-         "ground_truth": "I'm sorry. Sutter has a financial assistance program; let me connect you."},
+         "ground_truth": "I'm sorry. Acme has a financial assistance program; let me connect you."},
         {"query": "Read me the last 4 digits of my SSN on file.",
          "ground_truth": "I cannot read PII; let's verify your identity another way."},
     ]
@@ -72,7 +72,7 @@ def make_eval_dataset() -> str:
     local.write_text("\n".join(json.dumps(r) for r in rows), encoding="utf-8")
 
     ds = client.datasets.upload_file(
-        name="sutter-eval-set",
+        name="acme-eval-set",
         version="1",
         file_path=str(local),
     )
@@ -90,8 +90,8 @@ def make_evaluation(dataset_id: str) -> str:
     )
 
     evaluation = Evaluation(
-        display_name="Sutter agent quality - demo",
-        description="Evaluates the Sutter Member Services agent for relevance and coherence on 5 scenarios.",
+        display_name="Acme agent quality - demo",
+        description="Evaluates the Acme Member Services agent for relevance and coherence on 5 scenarios.",
         data=InputDataset(id=dataset_id),
         evaluators={
             "relevance": EvaluatorConfiguration(
@@ -120,13 +120,13 @@ def make_memory_store():
     print("\n[3/4] Creating memory store...", flush=True)
     base_paths = [
         # Try multiple known/likely paths and API versions.
-        ("PUT", f"{DATA_PLANE}/memoryStores/sutter-member-memory?api-version=2025-05-01-preview"),
-        ("PUT", f"{DATA_PLANE}/memorystores/sutter-member-memory?api-version=2025-05-01-preview"),
-        ("PUT", f"{DATA_PLANE}/memory/stores/sutter-member-memory?api-version=2025-05-01-preview"),
+        ("PUT", f"{DATA_PLANE}/memoryStores/acme-member-memory?api-version=2025-05-01-preview"),
+        ("PUT", f"{DATA_PLANE}/memorystores/acme-member-memory?api-version=2025-05-01-preview"),
+        ("PUT", f"{DATA_PLANE}/memory/stores/acme-member-memory?api-version=2025-05-01-preview"),
     ]
     payload = {
-        "displayName": "Sutter Member Memory",
-        "description": "Per-member conversation memory for the Sutter voice agents.",
+        "displayName": "Acme Member Memory",
+        "description": "Per-member conversation memory for the Acme voice agents.",
         "properties": {
             "kind": "default",
             "embeddingDeploymentName": "text-embedding-3-large",
@@ -153,9 +153,9 @@ def make_memory_store():
 def make_workflow():
     print("\n[4/4] Creating workflow stub...", flush=True)
     payloads = [
-        ("PUT", f"{DATA_PLANE}/workflows/sutter-triage-workflow?api-version=2025-05-01-preview",
+        ("PUT", f"{DATA_PLANE}/workflows/acme-triage-workflow?api-version=2025-05-01-preview",
          {
-             "displayName": "Sutter triage workflow",
+             "displayName": "Acme triage workflow",
              "description": "Routes member calls between Concierge, PBM, and Provider agents.",
              "properties": {
                  "kind": "agent-workflow",
@@ -163,7 +163,7 @@ def make_workflow():
                      "HealthPlanConcierge",
                      "PBMPharmacyAssistant",
                      "ProviderAssistant",
-                     "SutterHealthCoordinator",
+                     "AcmeHealthCoordinator",
                  ],
              },
          }),

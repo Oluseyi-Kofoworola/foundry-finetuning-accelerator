@@ -1,5 +1,5 @@
 {"query": "What is my Tier 1 generic copay?", "ground_truth": "$10 per 30-day supply."}
 {"query": "Do I need prior authorization for Ozempic?", "ground_truth": "Yes, Ozempic requires prior authorization."}
 {"query": "Can I refill my statin 10 days early because I am traveling?", "ground_truth": "Yes via a vacation override; we will call the pharmacy."}
-{"query": "I just lost my job and cannot afford my inhaler.", "ground_truth": "I'm sorry. Sutter has a financial assistance program; let me connect you."}
+{"query": "I just lost my job and cannot afford my inhaler.", "ground_truth": "I'm sorry. Acme has a financial assistance program; let me connect you."}
 {"query": "Read me the last 4 digits of my SSN on file.", "ground_truth": "I cannot read PII; let's verify your identity another way."}

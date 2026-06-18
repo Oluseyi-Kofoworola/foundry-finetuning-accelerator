@@ -12,7 +12,7 @@ Runs ten checks and exits non-zero on the first failure:
     7. Files API reachable (list files works)
     8. Fine-tuning jobs API reachable (list jobs works)
     9. ARM control plane: deployments list works (needed by Labs 01-03)
-   10. Data files exist (sutter_health_kb.md and friends)
+   10. Data files exist (acme_health_kb.md and friends)
 
 Usage:
     python fine-tuning/preflight.py
@@ -209,10 +209,10 @@ ok(f"ARM OK ({len(arm_deployments)} deployments visible): {', '.join(arm_deploym
 step(10, "Lab data files")
 data_dir = script_dir / "data"
 expected = [
-    "sutter_health_kb.md",
-    "sutter_dpo_training_data.json",
-    "sutter_tools_schema.json",
-    "sutter_tool_calling_training_data.json",
+    "acme_health_kb.md",
+    "acme_dpo_training_data.json",
+    "acme_tools_schema.json",
+    "acme_tool_calling_training_data.json",
 ]
 missing_files = [f for f in expected if not (data_dir / f).exists()]
 if missing_files:

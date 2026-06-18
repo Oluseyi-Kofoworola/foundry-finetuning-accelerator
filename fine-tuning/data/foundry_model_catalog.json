@@ -62,7 +62,7 @@
       "notes": "Pair with gpt-4o-mini for grounded answers — the pattern in Lab 04."
     },
     {
-      "deployment": "sutter-sft-deployment",
+      "deployment": "acme-sft-deployment",
       "model": "gpt-4o-mini (SFT)",
       "tier": "fine_tuned",
       "fine_tunable": false,
@@ -73,11 +73,11 @@
       "tool_calling_score": 7,
       "safety_score": 6,
       "best_for": ["domain_facts", "summarization"],
-      "strengths": "Knows Sutter-specific facts (copays, cutoff times, policies) the base model cannot.",
+      "strengths": "Knows Acme-specific facts (copays, cutoff times, policies) the base model cannot.",
       "notes": "Output of Lab 01 (SFT). Use when answers depend on private/domain facts."
     },
     {
-      "deployment": "sutter-dpo-deployment",
+      "deployment": "acme-dpo-deployment",
       "model": "gpt-4o-mini (DPO)",
       "tier": "fine_tuned",
       "fine_tunable": false,
@@ -88,11 +88,11 @@
       "tool_calling_score": 7,
       "safety_score": 7,
       "best_for": ["empathetic_tone", "member_messaging"],
-      "strengths": "Tuned for warm, empathetic Sutter member tone over cold textbook answers.",
+      "strengths": "Tuned for warm, empathetic Acme member tone over cold textbook answers.",
       "notes": "Output of Lab 02 (DPO). Use when tone/brand voice matters."
     },
     {
-      "deployment": "sutter-tools-deployment",
+      "deployment": "acme-tools-deployment",
       "model": "gpt-4o-mini (tool-calling FT)",
       "tier": "fine_tuned",
       "fine_tunable": false,

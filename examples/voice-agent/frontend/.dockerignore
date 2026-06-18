@@ -1,0 +1,25 @@
+# Ignore node_modules
+node_modules
+npm-debug.log
+
+# Ignore git
+.git
+.gitignore
+
+# Ignore development files
+*.md
+.env*
+.vscode
+coverage
+.nyc_output
+
+# Ignore Docker files
+Dockerfile
+.dockerignore
+docker-compose*.yml
+
+# Ignore test files
+tests
+__tests__
+*.test.*
+*.spec.*

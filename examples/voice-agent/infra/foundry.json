@@ -1,0 +1,156 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.39.26.7824",
+      "templateHash": "4076328212961511219"
+    }
+  },
+  "parameters": {
+    "environment": {
+      "type": "string",
+      "defaultValue": "dev",
+      "allowedValues": [
+        "dev",
+        "staging",
+        "prod"
+      ],
+      "metadata": {
+        "description": "Environment name"
+      }
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "Location for the Foundry account"
+      }
+    },
+    "baseName": {
+      "type": "string",
+      "defaultValue": "shuttervoice",
+      "metadata": {
+        "description": "Base name (must match existing deployment)"
+      }
+    },
+    "projectName": {
+      "type": "string",
+      "defaultValue": "agents",
+      "metadata": {
+        "description": "Project (capability host) name"
+      }
+    },
+    "gpt4oCapacity": {
+      "type": "int",
+      "defaultValue": 10,
+      "metadata": {
+        "description": "gpt-4o deployment capacity (TPM in K)"
+      }
+    },
+    "tags": {
+      "type": "object",
+      "defaultValue": {
+        "Project": "Acme-Voice-Agent",
+        "Environment": "[parameters('environment')]",
+        "Component": "AI-Foundry"
+      },
+      "metadata": {
+        "description": "Tags"
+      }
+    }
+  },
+  "variables": {
+    "accountName": "[format('aif-{0}-{1}', parameters('baseName'), parameters('environment'))]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.CognitiveServices/accounts",
+      "apiVersion": "2025-04-01-preview",
+      "name": "[variables('accountName')]",
+      "location": "[parameters('location')]",
+      "tags": "[parameters('tags')]",
+      "kind": "AIServices",
+      "sku": {
+        "name": "S0"
+      },
+      "identity": {
+        "type": "SystemAssigned"
+      },
+      "properties": {
+        "customSubDomainName": "[variables('accountName')]",
+        "publicNetworkAccess": "Enabled",
+        "disableLocalAuth": false,
+        "allowProjectManagement": true
+      }
+    },
+    {
+      "type": "Microsoft.CognitiveServices/accounts/projects",
+      "apiVersion": "2025-04-01-preview",
+      "name": "[format('{0}/{1}', variables('accountName'), parameters('projectName'))]",
+      "location": "[parameters('location')]",
+      "tags": "[parameters('tags')]",
+      "identity": {
+        "type": "SystemAssigned"
+      },
+      "properties": {
+        "displayName": "Acme Health Agents",
+        "description": "Multi-agent system for healthcare operations - Coordinator, PBM, Concierge, Provider"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.CognitiveServices/accounts', variables('accountName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.CognitiveServices/accounts/deployments",
+      "apiVersion": "2025-04-01-preview",
+      "name": "[format('{0}/{1}', variables('accountName'), 'gpt-4o')]",
+      "sku": {
+        "name": "GlobalStandard",
+        "capacity": "[parameters('gpt4oCapacity')]"
+      },
+      "properties": {
+        "model": {
+          "format": "OpenAI",
+          "name": "gpt-4o",
+          "version": "2024-08-06"
+        },
+        "raiPolicyName": "Microsoft.DefaultV2"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.CognitiveServices/accounts', variables('accountName'))]"
+      ]
+    }
+  ],
+  "outputs": {
+    "foundryAccountName": {
+      "type": "string",
+      "value": "[variables('accountName')]"
+    },
+    "foundryAccountId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.CognitiveServices/accounts', variables('accountName'))]"
+    },
+    "foundryEndpoint": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.CognitiveServices/accounts', variables('accountName')), '2025-04-01-preview').endpoint]"
+    },
+    "projectName": {
+      "type": "string",
+      "value": "[parameters('projectName')]"
+    },
+    "projectId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.CognitiveServices/accounts/projects', variables('accountName'), parameters('projectName'))]"
+    },
+    "projectEndpoint": {
+      "type": "string",
+      "value": "[format('https://{0}.services.ai.azure.com/api/projects/{1}', variables('accountName'), parameters('projectName'))]"
+    },
+    "gpt4oDeploymentName": {
+      "type": "string",
+      "value": "gpt-4o"
+    }
+  }
+}
