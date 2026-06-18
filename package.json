@@ -1,0 +1,15 @@
+{
+  "name": "azure-ai-foundry-accelerator",
+  "version": "1.0.0",
+  "private": true,
+  "description": "White-label Azure AI Foundry accelerator: realtime voice/chat agent + fine-tuning labs. Fork and customize per customer via config/client.config.json.",
+  "type": "module",
+  "scripts": {
+    "apply:config": "node scripts/apply-client-config.mjs",
+    "config:check": "node scripts/apply-client-config.mjs --check"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "license": "MIT"
+}

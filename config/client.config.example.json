@@ -1,0 +1,46 @@
+{
+  "$schema": "./client.config.schema.json",
+  "_comment": "SINGLE SOURCE OF TRUTH for client-specific customization. Copy this file to 'client.config.json', fill in your values, then run `npm run apply:config` (from repo root) to propagate brand + Azure settings into the app and labs. See docs/CUSTOMIZATION.md.",
+
+  "client": {
+    "slug": "acme",
+    "name": "Acme Health",
+    "shortName": "Acme",
+    "industry": "healthcare",
+    "supportPhone": "1-800-000-0000",
+    "supportUrl": "https://example.com/support"
+  },
+
+  "brand": {
+    "productName": "Acme Voice Agent",
+    "assistantName": "Acme Virtual Assistant",
+    "tagline": "Accurate, warm, and provably safe member support.",
+    "colors": {
+      "primary": "#003087",
+      "secondary": "#0066CC",
+      "accent": "#00A3E0",
+      "success": "#00843D",
+      "warning": "#FFB81C",
+      "error": "#C8102E"
+    }
+  },
+
+  "azure": {
+    "subscriptionId": "<your-subscription-id>",
+    "tenantId": "<your-tenant-id>",
+    "resourceGroup": "rg-acme-dev",
+    "region": "eastus2",
+    "foundryResourceName": "aif-acme-dev",
+    "foundryProject": "agents",
+    "appInsightsName": "appi-acme-dev"
+  },
+
+  "deployments": {
+    "chat": "gpt-4o",
+    "mini": "gpt-4o-mini",
+    "embeddings": "text-embedding-3-large",
+    "realtime": "gpt-4o-realtime",
+    "modelRouter": "model-router",
+    "finetunePrefix": "acme"
+  }
+}

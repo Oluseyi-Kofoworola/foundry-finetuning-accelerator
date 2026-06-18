@@ -1,0 +1,69 @@
+# =============================================================================
+# Repo-wide ignore rules. Per-project .gitignore files add more (see
+# sutter-voice-agent/.gitignore).
+# =============================================================================
+
+# ----- Secrets & local environment (NEVER commit real values) -----
+.env
+.env.*
+!.env.example
+!.env.*.example
+*.env.foundry
+**/agent-ids.json
+**/foundry-agent-ids.json
+**/foundry-agents.json
+!**/agent-ids.example.json
+!**/foundry-agents.example.json
+
+# ----- Logs & build artifacts -----
+*.log
+deploy-log.txt
+acr-build.log
+frontend-build.log
+.tools_job_progress.log
+*_job_progress.log
+
+# ----- Lab runtime state & local test scaffolding (machine-specific) -----
+# Fine-tuning resume markers written by the notebooks at runtime
+**/.tools_agent_id
+**/.tools_job_id
+**/.tools_model_id
+# Headless notebook test harness + its output (local dev only)
+fine-tuning/_run_nb.py
+fine-tuning/_results.txt
+
+# ----- Python -----
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+.ipynb_checkpoints/
+.pytest_cache/
+.mypy_cache/
+
+# ----- Node -----
+node_modules/
+dist/
+build/
+*.tsbuildinfo
+
+# ----- Client customization (each fork fills these in locally) -----
+/config/client.config.json
+
+# ----- Separate project with its own git repo (do not nest here) -----
+# sutter-voice-agent is published independently at its own remote.
+sutter-voice-agent/
+
+# ----- OS / Editor -----
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*.swo
+
+# ----- Agent / assistant tooling (local only) -----
+.github/instructions/session-memory.instructions.md
+CLAUDE.md
+.cursor/rules
+.azure/

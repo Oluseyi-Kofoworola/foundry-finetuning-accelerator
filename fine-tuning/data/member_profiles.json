@@ -1,0 +1,14 @@
+{
+  "MEM-099": {
+    "name": "Maria Rodriguez",
+    "preferred_pharmacy": "CVS - 2645 Geary Blvd, San Francisco",
+    "active_meds": [
+      "metformin 500mg",
+      "lisinopril 10mg"
+    ],
+    "allergies": [
+      "peanut"
+    ],
+    "communication_pref": "text"
+  }
+}

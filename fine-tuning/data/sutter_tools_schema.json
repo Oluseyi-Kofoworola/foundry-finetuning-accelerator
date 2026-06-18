@@ -1,0 +1,85 @@
+[
+  {
+    "type": "function",
+    "function": {
+      "name": "verify_member_identity",
+      "description": "Verify a Sutter Health member's identity using full name, date of birth, and either member ID or ZIP code before disclosing any protected health information.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "fullName":   { "type": "string", "description": "Member's full legal name as it appears on their Sutter record" },
+          "dateOfBirth":{ "type": "string", "description": "Date of birth in YYYY-MM-DD format" },
+          "memberId":   { "type": "string", "description": "Sutter member ID, format MEM-XXX. Optional if zipCode is provided." },
+          "zipCode":    { "type": "string", "description": "5-digit ZIP code on file. Optional if memberId is provided." }
+        },
+        "required": ["fullName", "dateOfBirth"]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "lookup_prescriptions",
+      "description": "List the active prescriptions for a verified Sutter member.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "memberId":      { "type": "string", "description": "Sutter member ID, format MEM-XXX" },
+          "includeExpired":{ "type": "boolean","description": "Include expired prescriptions in results. Default false." }
+        },
+        "required": ["memberId"]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "request_refill",
+      "description": "Request a refill of an active prescription for a verified Sutter member.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "memberId":      { "type": "string", "description": "Sutter member ID" },
+          "prescriptionId":{ "type": "string", "description": "Prescription ID, format RX-XXXXXX" },
+          "pharmacy":      { "type": "string", "enum": ["pickup", "mail_order"], "description": "Where to fill: in-person pickup at Sutter pharmacy, or 90-day mail order" },
+          "pharmacyLocation": { "type": "string", "description": "Sutter pharmacy location name (required if pharmacy is 'pickup')" }
+        },
+        "required": ["memberId", "prescriptionId", "pharmacy"]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "find_in_network_providers",
+      "description": "Search the Sutter Health in-network provider directory by specialty and location.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "specialty":             { "type": "string", "description": "Medical specialty, e.g. 'internal medicine', 'cardiology', 'dermatology'" },
+          "zipCode":               { "type": "string", "description": "5-digit ZIP code to search near" },
+          "acceptingNewPatients":  { "type": "boolean","description": "Only return providers currently accepting new patients. Default true." },
+          "language":              { "type": "string", "description": "Provider's spoken language, e.g. 'English', 'Spanish', 'Mandarin'. Optional." }
+        },
+        "required": ["specialty", "zipCode"]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "calculate_medication_price",
+      "description": "Calculate the member copay for a specific medication under the Sutter Health Plus formulary.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "memberId":     { "type": "string", "description": "Sutter member ID" },
+          "medication":   { "type": "string", "description": "Medication name including dose, e.g. 'atorvastatin 20mg', 'lisinopril 10mg'" },
+          "daysSupply":   { "type": "integer","description": "Days supply: 30, 60, or 90", "enum": [30, 60, 90] },
+          "pharmacy":     { "type": "string", "enum": ["retail", "mail_order"], "description": "Retail pickup or mail-order pharmacy" }
+        },
+        "required": ["memberId", "medication", "daysSupply", "pharmacy"]
+      }
+    }
+  }
+]
