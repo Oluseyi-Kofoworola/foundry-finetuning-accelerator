@@ -4,7 +4,7 @@
 > assistant — and prove every step live.** 20 notebooks, no portal clicks, no
 > throwaway demo code.
 
-## You're the one who has to prove it works
+## From prototype to production
 
 You're an engineer, solution architect, or AI practitioner, and someone just
 asked the hard question: *"Can you actually **customize and operationalize** a
@@ -43,6 +43,36 @@ result** — so the labs aren't academic, they produce something a real app uses
 Run **[Lab 00](00_synthetic_data_generation.ipynb)** — in 1–2 minutes a single
 markdown file becomes a full training set. That's the moment the story starts.
 (Setup is below if you haven't configured Azure yet.)
+
+---
+
+## Want a deep-dive Azure AI Foundry training?
+
+The 20 labs double as a **self-paced curriculum** for engineers and architects
+who want to *learn* Foundry hands-on, not just demo it. Work the three acts in
+order — each one builds on the last, and by the end you've touched the full
+customize-to-production lifecycle on real Azure infrastructure.
+
+| Stage | Labs | What you'll master | Time to work through |
+|-------|------|--------------------|----------------------|
+| **1. Foundations — train a model** | 00 → 03 | Synthetic data generation, supervised fine-tuning (facts), DPO (tone), and tool-calling fine-tuning. The mechanics of teaching a base model *your* knowledge, voice, and APIs. | ~2–4 hrs (mostly job wait time) |
+| **2. Capabilities — build the agent** | 04 → 09 | RAG, conversation memory, date/time grounding, evaluation scoreboards, the four-layer guardrail stack, and the Foundry Decision Advisor. The patterns every production agent needs. | ~2–3 hrs |
+| **3. Production — operate responsibly** | 10 → 18b | Security/compliance, multi-agent orchestration, deployment, continuous eval, cost governance, migration, reasoning (RFT), responsible AI, and end-to-end agent flow. | ~3–4 hrs |
+
+**How to study each lab.** Read the markdown cell at the top (the *why*), run
+the cells top-to-bottom (the *how*), then change one variable — a prompt, a
+hyperparameter, a data file — and re-run to see what moves. That edit-and-rerun
+loop is where the learning sticks.
+
+**Go deeper.** Re-theme the data files in `data/` to your own domain and repeat
+Part A — fine-tuning on data you understand is the fastest way to build
+intuition for what SFT, DPO, and tool-calling FT each actually change.
+
+**The capstone.** Finish with **[Lab 09 — Foundry Decision Advisor](pre-demo/09_foundry_decision_advisor.ipynb)**.
+It ties the whole curriculum together: paste any workload and it maps each gap
+to the Foundry capability — and the lab — that solves it. If you can read its
+recommendations and know *why* it picked each one, you've internalized the
+training.
 
 ---
 
