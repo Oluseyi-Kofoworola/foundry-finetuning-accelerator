@@ -1,0 +1,19 @@
+# Pinned to the versions the labs were verified against.
+# This accelerator's claim is "verified, runnable labs" - open-ended ranges
+# would install untested SDK combinations months from now.
+#
+# Verified on Python 3.13.14; Python 3.10+ is supported.
+# To refresh: upgrade deliberately, re-run validate_data.py and preflight.py,
+# re-run the affected labs, then update these pins.
+
+openai==2.53.0
+azure-identity==1.25.3
+python-dotenv==1.2.2
+matplotlib==3.11.1
+pandas==3.0.5
+requests==2.34.2
+ipykernel==7.3.0
+nbformat==5.11.0
+nbclient==0.11.0
+azure-monitor-opentelemetry==1.8.9
+opentelemetry-instrumentation-openai-v2==2.4b0

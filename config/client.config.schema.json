@@ -1,0 +1,71 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Client Customization Config",
+  "description": "Single source of truth for white-labeling this AI accelerator for a customer.",
+  "type": "object",
+  "required": ["client", "brand", "azure", "deployments"],
+  "additionalProperties": true,
+  "properties": {
+    "client": {
+      "type": "object",
+      "required": ["slug", "name", "shortName"],
+      "properties": {
+        "slug": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{1,30}$",
+          "description": "Lowercase identifier used as a prefix for Azure resources, deployments, and tracing service names."
+        },
+        "name": { "type": "string", "description": "Full display name, e.g. 'Acme Health'." },
+        "shortName": { "type": "string", "description": "Short brand name used in compact UI." },
+        "industry": { "type": "string", "description": "Domain vertical, e.g. 'healthcare', 'banking', 'retail'." },
+        "supportPhone": { "type": "string" },
+        "supportUrl": { "type": "string" }
+      }
+    },
+    "brand": {
+      "type": "object",
+      "required": ["productName", "assistantName", "colors"],
+      "properties": {
+        "productName": { "type": "string" },
+        "assistantName": { "type": "string" },
+        "tagline": { "type": "string" },
+        "colors": {
+          "type": "object",
+          "required": ["primary", "secondary", "accent"],
+          "properties": {
+            "primary": { "type": "string", "pattern": "^#([0-9a-fA-F]{6})$" },
+            "secondary": { "type": "string", "pattern": "^#([0-9a-fA-F]{6})$" },
+            "accent": { "type": "string", "pattern": "^#([0-9a-fA-F]{6})$" },
+            "success": { "type": "string", "pattern": "^#([0-9a-fA-F]{6})$" },
+            "warning": { "type": "string", "pattern": "^#([0-9a-fA-F]{6})$" },
+            "error": { "type": "string", "pattern": "^#([0-9a-fA-F]{6})$" }
+          }
+        }
+      }
+    },
+    "azure": {
+      "type": "object",
+      "required": ["resourceGroup", "region", "foundryResourceName"],
+      "properties": {
+        "subscriptionId": { "type": "string" },
+        "tenantId": { "type": "string" },
+        "resourceGroup": { "type": "string" },
+        "region": { "type": "string" },
+        "foundryResourceName": { "type": "string" },
+        "foundryProject": { "type": "string" },
+        "appInsightsName": { "type": "string" }
+      }
+    },
+    "deployments": {
+      "type": "object",
+      "properties": {
+        "chat": { "type": "string" },
+        "mini": { "type": "string" },
+        "embeddings": { "type": "string" },
+        "realtime": { "type": "string" },
+        "modelRouter": { "type": "string" },
+        "finetunePrefix": { "type": "string" }
+      }
+    }
+  }
+}

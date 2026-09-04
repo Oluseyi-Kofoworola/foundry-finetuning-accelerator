@@ -1,0 +1,14 @@
+{
+  "jobId": "ftjob-b7ed11a11773437b9a8b991d2fb00cca",
+  "baseModel": "gpt-4.1-mini-2025-04-14",
+  "trainingFileId": "file-b654c78bc21d4bf88a24d165e54f2751",
+  "validationFileId": "file-fd956b328c3b465c94aacbae4297fa8c",
+  "trainingSha256": "8d70f4ba0781a7642132c10749fa9b904b47daa1b750c169cc20b9bf7e441295",
+  "schemaSha256": "d2756cb57f61f08519dd329544d57003ea3df803f2eab4a2b5934d460c7b547e",
+  "seed": 42,
+  "epochs": 3,
+  "fineTunedModel": "gpt-4.1-mini-2025-04-14.ft-b7ed11a11773437b9a8b991d2fb00cca-acme-tools",
+  "trainingStatus": "succeeded",
+  "deployment": "acme-tools-deployment",
+  "deploymentState": "Succeeded"
+}

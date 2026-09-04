@@ -1,0 +1,76 @@
+# =============================================================================
+# Repo-wide ignore rules. Per-project .gitignore files add more (see
+# examples/voice-agent/.gitignore).
+# =============================================================================
+
+# ----- Secrets & local environment (NEVER commit real values) -----
+.env
+.env.*
+!.env.example
+!.env.*.example
+*.env.foundry
+**/agent-ids.json
+**/foundry-agent-ids.json
+**/foundry-agents.json
+!**/agent-ids.example.json
+!**/foundry-agents.example.json
+
+# ----- Logs & build artifacts -----
+*.log
+deploy-log.txt
+acr-build.log
+frontend-build.log
+.tools_job_progress.log
+*_job_progress.log
+
+# ----- Lab runtime state & local test scaffolding (machine-specific) -----
+# Fine-tuning resume markers written by the notebooks at runtime
+**/.tools_agent_id
+**/.tools_job_id
+**/.tools_model_id
+**/.*_job_id
+**/.*_job_state.json
+**/.prev_run.json
+# Local-only job runners (submit real billable jobs) and their scratch output.
+# _run_nb.py is intentionally NOT ignored: the demo guide depends on it.
+fine-tuning/_run_finetuning.py
+fine-tuning/_run_rtor.py
+fine-tuning/_results.txt
+fine-tuning/_retest*.txt
+fine-tuning/*.err
+fine-tuning/_retrain.err
+# Personal VS Code workspace files (machine-specific)
+*.code-workspace
+*.vsix
+
+# ----- Python -----
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+.ipynb_checkpoints/
+.pytest_cache/
+.mypy_cache/
+
+# ----- Node -----
+node_modules/
+dist/
+build/
+*.tsbuildinfo
+
+# ----- Client customization (each fork fills these in locally) -----
+/config/client.config.json
+
+# ----- OS / Editor -----
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*.swo
+
+# ----- Agent / assistant tooling (local only) -----
+.github/instructions/session-memory.instructions.md
+CLAUDE.md
+.cursor/rules
+.azure/

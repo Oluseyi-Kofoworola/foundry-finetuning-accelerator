@@ -1,0 +1,49 @@
+[
+  {
+    "type": "function",
+    "function": {
+      "name": "classify_return_to_or",
+      "description": "Determine whether the current operative episode is an unplanned Return to the Operating Room (RTOR) for the index surgical procedure, applying the Acme Health surgical-quality abstraction rules. Always cite the exact source sentence that justified the determination.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "is_return_to_or": {
+            "type": "boolean",
+            "description": "true if the current surgery is an unplanned return to an operating room that is related to the index surgery and occurs within 30 days; false otherwise (planned/staged, unrelated, outside 30 days, or not performed in an operating room)."
+          },
+          "evidence": {
+            "type": "string",
+            "description": "The single most decisive sentence quoted verbatim from the operative notes, progress note, or timeline, followed by which abstraction rule it triggers."
+          }
+        },
+        "required": ["is_return_to_or", "evidence"]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "flag_for_human_review",
+      "description": "Escalate an ambiguous surgical case to a human abstractor when the operative notes are contradictory, incomplete, or do not clearly satisfy any single abstraction rule.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "case_id": {
+            "type": "string",
+            "description": "The case identifier, format RTOR-XXXX."
+          },
+          "reason": {
+            "type": "string",
+            "description": "Why the case cannot be classified automatically (e.g. conflicting documentation of planned vs unplanned, missing operative note, ambiguous location)."
+          },
+          "candidate_rules": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "The abstraction rules that plausibly apply, e.g. ['Rule 1.1', 'Rule 1.2']."
+          }
+        },
+        "required": ["case_id", "reason"]
+      }
+    }
+  }
+]

@@ -1,0 +1,125 @@
+{
+  "MEM-002": {
+    "name": "Alex Example",
+    "date_of_birth": "1978-04-15",
+    "plan": "Acme Health Plus Gold HMO",
+    "preferred_pharmacy": "ACME Sacramento",
+    "active_meds": [
+      "lisinopril 10mg"
+    ],
+    "allergies": [
+      "sulfa"
+    ],
+    "primary_care_provider": "Dr. Avery Example",
+    "communication_pref": "email",
+    "locale": "en-US",
+    "accessibility_needs": [],
+    "consent_to_message": true
+  },
+  "MEM-007": {
+    "name": "Jordan Example",
+    "date_of_birth": "1965-09-03",
+    "plan": "Acme Health Plus Silver HMO",
+    "preferred_pharmacy": "ACME Mail-Order",
+    "active_meds": [
+      "atorvastatin 20mg"
+    ],
+    "allergies": [],
+    "primary_care_provider": "Dr. Cameron Example",
+    "communication_pref": "phone",
+    "locale": "en-US",
+    "accessibility_needs": [
+      "large-print documents"
+    ],
+    "consent_to_message": false
+  },
+  "MEM-014": {
+    "name": "Taylor Example",
+    "date_of_birth": "1972-01-22",
+    "plan": "Acme Health Plus Gold HMO",
+    "preferred_pharmacy": "ACME Mail-Order",
+    "active_meds": [
+      "metformin 500mg",
+      "insulin glargine"
+    ],
+    "allergies": [
+      "penicillin"
+    ],
+    "primary_care_provider": "Dr. Drew Example",
+    "communication_pref": "text",
+    "locale": "es-US",
+    "accessibility_needs": [],
+    "consent_to_message": true
+  },
+  "MEM-021": {
+    "name": "Morgan Example",
+    "date_of_birth": "1980-06-30",
+    "plan": "Acme Health Plus Platinum HMO",
+    "preferred_pharmacy": "ACME Palo Alto",
+    "active_meds": [
+      "omeprazole 20mg",
+      "vitamin D 2000IU"
+    ],
+    "allergies": [],
+    "primary_care_provider": "Dr. Emerson Example",
+    "communication_pref": "text",
+    "locale": "en-US",
+    "accessibility_needs": [],
+    "consent_to_message": true
+  },
+  "MEM-031": {
+    "name": "Casey Example",
+    "date_of_birth": "1958-11-04",
+    "plan": "Acme Health Plus Gold HMO",
+    "preferred_pharmacy": "ACME Pacific Heights",
+    "active_meds": [
+      "losartan 50mg"
+    ],
+    "allergies": [
+      "aspirin"
+    ],
+    "primary_care_provider": "Dr. Finley Example",
+    "communication_pref": "phone",
+    "locale": "en-US",
+    "accessibility_needs": [
+      "hearing relay"
+    ],
+    "consent_to_message": false
+  },
+  "MEM-045": {
+    "name": "Riley Example",
+    "date_of_birth": "1994-07-12",
+    "plan": "Acme Health Plus Gold HMO",
+    "preferred_pharmacy": "ACME Midtown",
+    "active_meds": [
+      "prenatal vitamins",
+      "levothyroxine 50mcg"
+    ],
+    "allergies": [
+      "latex"
+    ],
+    "primary_care_provider": "Dr. Gray Example",
+    "communication_pref": "text",
+    "locale": "en-US",
+    "accessibility_needs": [],
+    "consent_to_message": true
+  },
+  "MEM-099": {
+    "name": "Jamie Example",
+    "date_of_birth": "1969-03-08",
+    "plan": "Acme Health Plus Silver HMO",
+    "preferred_pharmacy": "CVS - 2645 Geary Blvd, San Francisco",
+    "active_meds": [
+      "metformin 500mg",
+      "lisinopril 10mg"
+    ],
+    "allergies": [
+      "peanut"
+    ],
+    "primary_care_provider": "Dr. Avery Example",
+    "communication_pref": "text",
+    "locale": "en-US",
+    "accessibility_needs": [],
+    "consent_to_message": true
+  }
+}

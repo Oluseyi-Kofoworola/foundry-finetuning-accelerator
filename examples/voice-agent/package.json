@@ -1,0 +1,46 @@
+{
+  "name": "voice-agent",
+  "version": "1.0.0",
+  "description": "Enterprise voice agent (white-label template)",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "scripts": {
+    "install:all": "npm install && npm run install:backend && npm run install:frontend",
+    "install:backend": "cd backend && npm install",
+    "install:frontend": "cd frontend && npm install",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "build": "npm run build:backend && npm run build:frontend",
+    "build:backend": "cd backend && npm run build",
+    "build:frontend": "cd frontend && npm run build",
+    "lint": "npm run lint:backend && npm run lint:frontend",
+    "lint:backend": "cd backend && npm run lint",
+    "lint:frontend": "cd frontend && npm run lint",
+    "test": "npm run test:backend && npm run test:frontend",
+    "test:backend": "cd backend && npm test",
+    "test:frontend": "cd frontend && npm test",
+    "deploy:foundry": "powershell -ExecutionPolicy Bypass -File ./deploy-foundry-upgrade.ps1",
+    "setup:agents": "npx ts-node scripts/setup-foundry-agents.ts",
+    "eval:golden": "npx tsx scripts/run-foundry-evals.ts",
+    "eval:golden:live": "npx tsx scripts/run-foundry-evals.ts --mode=live"
+  },
+  "devDependencies": {
+    "@azure/identity": "^4.13.0",
+    "concurrently": "^8.2.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-org/voice-agent.git"
+  },
+  "author": "",
+  "license": "MIT"
+}

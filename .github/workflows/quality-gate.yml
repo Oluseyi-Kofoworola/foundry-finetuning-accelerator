@@ -1,0 +1,65 @@
+name: quality-gate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install lab dependencies
+        run: pip install -r fine-tuning/requirements.txt
+
+      - name: Validate lab datasets
+        run: python validate_data.py
+        working-directory: fine-tuning
+
+      - name: Check notebooks are valid JSON
+        run: python .github/scripts/check_notebooks.py
+
+      - name: Check documentation links resolve
+        run: python .github/scripts/check_links.py
+
+      - name: Check for environment-specific values
+        run: python .github/scripts/check_no_leaks.py
+
+      - name: Check live-demo and pre-demo have not diverged
+        run: python .github/scripts/check_lab_parity.py
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Lint Python
+        run: |
+          pip install ruff
+          ruff check .
+
+  secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Scan for committed secrets
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,15 @@
+{
+  "name": "foundry-finetuning-accelerator",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Hands-on labs for learning model customization on Microsoft Foundry: supervised fine-tuning, preference optimization, tool-calling fine-tuning, retrieval, guardrails, evaluation, and production governance.",
+  "type": "module",
+  "scripts": {
+    "apply:config": "node scripts/apply-client-config.mjs",
+    "config:check": "node scripts/apply-client-config.mjs --check"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "license": "MIT"
+}

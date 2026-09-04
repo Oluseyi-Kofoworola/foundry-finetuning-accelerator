@@ -1,0 +1,17 @@
+[project]
+name = "foundry-finetuning-accelerator"
+version = "0.1.0"
+description = "Hands-on labs for learning model customization on Microsoft Foundry."
+requires-python = ">=3.10"
+license = { text = "MIT" }
+
+[tool.ruff]
+target-version = "py310"
+# Notebooks are teaching artifacts: they re-import modules so a cell survives a
+# kernel restart, and Fabric injects `spark` at runtime. Both read as errors here.
+extend-exclude = ["*.ipynb", ".venv*", "node_modules"]
+
+[tool.ruff.lint]
+# Correctness rules only. Style is not worth failing a build over in a repo
+# whose Python is mostly single-run lab tooling.
+select = ["E9", "F63", "F7", "F82", "F401", "F811"]
